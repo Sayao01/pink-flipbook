@@ -290,12 +290,25 @@
       text-align: left;
     }
 
+    textarea.over-limit {
+      border-color: #ff2f92;
+      background: rgba(255, 210, 232, 0.95);
+      box-shadow:
+        inset 0 0 12px rgba(255, 47, 146, 0.55),
+        0 0 18px rgba(255, 47, 146, 0.45);
+    }
+
     .counter {
       margin-top: 8px;
       text-align: center;
       font-size: 13px;
       color: #9d2a72;
       font-weight: bold;
+    }
+
+    .counter.over {
+      color: #d0006f;
+      text-shadow: 0 0 8px rgba(255, 47, 146, 0.45);
     }
 
     .small-button {
@@ -419,8 +432,8 @@
           <h2 class="section-title">TEXT PAGES</h2>
 
           <p class="hint">
-            小説は1ページ2段組です。<br />
-            各段は500文字まで編集できます。
+            500文字を超えても入力できます。<br />
+            超えた欄は赤くなり、保存時に止まります。
           </p>
 
           <div id="pageList" class="page-list"></div>
@@ -623,6 +636,15 @@
           return;
         }
 
+        const hasOverLimit = cleanedPages.some(page =>
+          page.column1.length > 500 || page.column2.length > 500
+        );
+
+        if (hasOverLimit) {
+          alert("500文字を超えている段があります。赤くなっている欄を500文字以内にしてください。");
+          return;
+        }
+
         currentBook.textPages = cleanedPages;
         currentBook.images = [];
         currentBook.novelFont = novelFont;
@@ -687,13 +709,13 @@
           <div class="columns-editor">
             <div class="column-box">
               <div class="column-label">1段目 / 500文字</div>
-              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
               <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
             </div>
 
             <div class="column-box">
               <div class="column-label">2段目 / 500文字</div>
-              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
               <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
             </div>
           </div>
@@ -719,14 +741,29 @@
 
       document.querySelectorAll("textarea").forEach((textarea) => {
         textarea.addEventListener("input", () => {
-          const pageIndex = textarea.getAttribute("data-page");
-          const column = textarea.getAttribute("data-column");
-          const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
-          counter.textContent = textarea.value.length + " / 500";
+          updateCounter(textarea);
         });
+
+        updateCounter(textarea);
       });
 
       applyTextAreaStyle();
+    }
+
+    function updateCounter(textarea) {
+      const pageIndex = textarea.getAttribute("data-page");
+      const column = textarea.getAttribute("data-column");
+      const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
+
+      if (!counter) return;
+
+      const count = textarea.value.length;
+      counter.textContent = count + " / 500";
+
+      const isOver = count > 500;
+
+      textarea.classList.toggle("over-limit", isOver);
+      counter.classList.toggle("over", isOver);
     }
 
     function saveCurrentText() {
