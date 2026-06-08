@@ -38,12 +38,8 @@
     }
 
     @keyframes glitter {
-      from {
-        transform: translateY(0);
-      }
-      to {
-        transform: translateY(-80px);
-      }
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
     }
 
     .app {
@@ -122,35 +118,32 @@
       justify-content: center;
       align-items: center;
       overflow: visible;
+      touch-action: pan-y;
     }
 
     #bookShell {
       margin: 0 auto;
       filter: drop-shadow(0 26px 28px rgba(122,20,86,0.35));
-      transition: transform 0.2s ease;
-    }
-
-    /*
-      ここが大事！！
-      右開きのときだけ、本全体を左右反転する。
-      そのあと中身だけもう一回反転して、画像や文字は普通に読めるようにする。
-    */
-    #bookShell.right-opening {
-      transform: scaleX(-1);
-    }
-
-    #bookShell.right-opening .page-content {
-      transform: scaleX(-1);
     }
 
     #flipbook {
       margin: 0 auto;
+      cursor: grab;
+    }
+
+    #flipbook:active {
+      cursor: grabbing;
     }
 
     .page {
       background: #fff6fd;
       border: 1px solid #ffd1ef;
       overflow: hidden;
+      cursor: grab;
+    }
+
+    .page:active {
+      cursor: grabbing;
     }
 
     .page-content {
@@ -164,6 +157,8 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .page-content::after {
@@ -185,6 +180,9 @@
       background: white;
       position: relative;
       z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .novel-page {
@@ -205,6 +203,8 @@
       font-size: 16px;
       line-height: 2;
       text-align: left;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .vertical-text {
@@ -247,6 +247,8 @@
       letter-spacing: 3px;
       line-height: 1.5;
       word-break: break-word;
+      position: relative;
+      z-index: 1;
     }
 
     .cover-sub {
@@ -254,6 +256,8 @@
       color: #8c1d63;
       font-weight: bold;
       line-height: 1.8;
+      position: relative;
+      z-index: 1;
     }
 
     .blank {
@@ -323,7 +327,7 @@
     <header>
       <h1 id="bookTitle">Pink Flipbook</h1>
       <p id="subtitle" class="subtitle">
-        ページの端をドラッグして、紙みたいにめくれます♡
+        ページの端を軽くドラッグしてめくれます♡
       </p>
     </header>
 
@@ -359,7 +363,6 @@
     const subtitle = document.getElementById("subtitle");
     const missingMessage = document.getElementById("missingMessage");
     const readerArea = document.getElementById("readerArea");
-    const bookShell = document.getElementById("bookShell");
     const flipbookElement = document.getElementById("flipbook");
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
@@ -372,6 +375,8 @@
     const currentBook = books.find((book) => book.id === bookId);
 
     let pageFlip = null;
+    let totalPages = 0;
+    let isRightOpening = false;
 
     if (!currentBook) {
       bookTitle.textContent = "Not Found";
@@ -384,19 +389,14 @@
 
     function createFlipbook() {
       const isTextBook = currentBook.type === "text";
-      const isRightOpening = currentBook.direction === "rtl";
+      isRightOpening = currentBook.direction === "rtl";
+
       const directionLabel = isRightOpening ? "右開き" : "左開き";
       const typeLabel = isTextBook ? "文字本" : "画像本";
 
       subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
 
-      if (isRightOpening) {
-        bookShell.classList.add("right-opening");
-      } else {
-        bookShell.classList.remove("right-opening");
-      }
-
-      const pages = [];
+      let pages = [];
 
       pages.push(`
         <div class="page cover-page">
@@ -450,35 +450,63 @@
         `);
       }
 
+      /*
+        右開きの場合：
+        ページ順を逆にして、最後のページから表示する。
+        これで「次のページ」が flipPrev になり、
+        左から右にドラッグする動きになる。
+      */
+      if (isRightOpening) {
+        pages = pages.reverse();
+      }
+
+      totalPages = pages.length;
       flipbookElement.innerHTML = pages.join("");
 
-      const isMobile = window.innerWidth <= 700;
+      const isSmallScreen = window.innerWidth <= 520;
 
-pageFlip = new St.PageFlip(flipbookElement, {
-  width: 380,
-  height: 540,
-  size: "stretch",
-  minWidth: 280,
-  maxWidth: 420,
-  minHeight: 400,
-  maxHeight: 620,
+      pageFlip = new St.PageFlip(flipbookElement, {
+        width: isSmallScreen ? 310 : 430,
+        height: isSmallScreen ? 440 : 610,
+        size: "stretch",
+        minWidth: 260,
+        maxWidth: isSmallScreen ? 330 : 520,
+        minHeight: 360,
+        maxHeight: isSmallScreen ? 470 : 720,
 
-  showCover: true,
+        showCover: true,
 
-  // PC・タブレットでは見開き、スマホだけ1ページ表示
-  usePortrait: isMobile,
+        /*
+          見開きにしたいので false。
+          スマホでも基本は見開き優先。
+        */
+        usePortrait: false,
 
-  mobileScrollSupport: false,
-  useMouseEvents: true,
+        /*
+          ここが大事。
+          数字を小さくすると、軽いドラッグでもめくれやすくなる。
+        */
+        swipeDistance: 8,
 
-  drawShadow: true,
-  maxShadowOpacity: 0.8,
-  flippingTime: 1100,
-  startZIndex: 10,
-  startPage: 0
+        mobileScrollSupport: false,
+        useMouseEvents: true,
+        clickEventForward: true,
+
+        drawShadow: true,
+        maxShadowOpacity: 0.8,
+        flippingTime: 850,
+        startZIndex: 10,
+        startPage: isRightOpening ? totalPages - 1 : 0
       });
 
       pageFlip.loadFromHTML(document.querySelectorAll(".page"));
+
+      if (isRightOpening) {
+        setTimeout(() => {
+          pageFlip.turnToPage(totalPages - 1);
+          updateInfo();
+        }, 50);
+      }
 
       pageFlip.on("flip", () => {
         updateInfo();
@@ -489,26 +517,51 @@ pageFlip = new St.PageFlip(flipbookElement, {
 
     nextButton.addEventListener("click", () => {
       if (!pageFlip) return;
-      pageFlip.flipNext();
-      setTimeout(updateInfo, 400);
+
+      if (isRightOpening) {
+        pageFlip.flipPrev();
+      } else {
+        pageFlip.flipNext();
+      }
+
+      setTimeout(updateInfo, 300);
     });
 
     prevButton.addEventListener("click", () => {
       if (!pageFlip) return;
-      pageFlip.flipPrev();
-      setTimeout(updateInfo, 400);
+
+      if (isRightOpening) {
+        pageFlip.flipNext();
+      } else {
+        pageFlip.flipPrev();
+      }
+
+      setTimeout(updateInfo, 300);
     });
 
     function updateInfo() {
       if (!pageFlip) return;
 
-      const current = pageFlip.getCurrentPageIndex();
+      const physicalPage = pageFlip.getCurrentPageIndex();
       const total = pageFlip.getPageCount();
 
-      pageInfo.textContent = `${current + 1} / ${total} pages`;
+      let logicalPage;
 
-      prevButton.disabled = current === 0;
-      nextButton.disabled = current >= total - 1;
+      if (isRightOpening) {
+        logicalPage = total - physicalPage;
+      } else {
+        logicalPage = physicalPage + 1;
+      }
+
+      pageInfo.textContent = `${logicalPage} / ${total} pages`;
+
+      if (isRightOpening) {
+        nextButton.disabled = physicalPage === 0;
+        prevButton.disabled = physicalPage >= total - 1;
+      } else {
+        prevButton.disabled = physicalPage === 0;
+        nextButton.disabled = physicalPage >= total - 1;
+      }
     }
 
     function escapeHtml(text) {
