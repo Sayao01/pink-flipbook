@@ -8,7 +8,9 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -36,8 +38,12 @@
     }
 
     @keyframes glitter {
-      from { transform: translateY(0); }
-      to { transform: translateY(-80px); }
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-80px);
+      }
     }
 
     .app {
@@ -58,7 +64,10 @@
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
-      text-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff4fc3, 0 0 36px #fff;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
       word-break: break-word;
     }
 
@@ -89,14 +98,17 @@
       margin-bottom: 22px;
     }
 
-    a.button, button {
+    a.button,
+    button {
       text-decoration: none;
       cursor: pointer;
       padding: 13px 24px;
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
-      box-shadow: 0 6px 0 #d95aa9, 0 0 18px rgba(255,141,221,0.9);
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
       color: #7a1456;
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
@@ -107,7 +119,9 @@
     .bookshelf-title {
       font-size: 28px;
       color: #fff;
-      text-shadow: 0 3px 0 #d95aa9, 0 0 18px #ff4fc3;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 18px #ff4fc3;
       margin: 8px 0 8px;
       text-align: center;
       letter-spacing: 3px;
@@ -134,8 +148,11 @@
       padding: 18px;
       border-radius: 24px;
       border: 3px solid #fff;
-      background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,182,230,0.75));
-      box-shadow: 0 12px 0 #d95aa9, 0 0 22px rgba(255,105,210,0.5);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,182,230,0.75));
+      box-shadow:
+        0 12px 0 #d95aa9,
+        0 0 22px rgba(255,105,210,0.5);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -187,7 +204,9 @@
     .small-button {
       padding: 9px 14px;
       font-size: 13px;
-      box-shadow: 0 4px 0 #d95aa9, 0 0 12px rgba(255,141,221,0.9);
+      box-shadow:
+        0 4px 0 #d95aa9,
+        0 0 12px rgba(255,141,221,0.9);
     }
 
     .empty-shelf {
@@ -199,21 +218,76 @@
     }
 
     @media (max-width: 700px) {
-      .app { width: 94vw; padding: 22px 0 36px; }
-      header { padding: 16px 8px; }
-      h1 { font-size: clamp(34px, 12vw, 56px); letter-spacing: 3px; }
-      .panel { padding: 16px; border-radius: 26px; margin: 16px auto; }
-      a.button, button { width: 100%; text-align: center; padding: 12px 16px; font-size: 13px; }
-      .bookshelf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .book-card { min-height: 200px; padding: 12px; border-radius: 20px; }
-      .book-cover { height: 105px; border-radius: 14px; }
-      .book-title { font-size: 14px; }
-      .book-meta { font-size: 11px; }
-      .small-button { width: auto; padding: 8px 10px; font-size: 11px; }
+      .app {
+        width: 94vw;
+        padding: 22px 0 36px;
+      }
+
+      header {
+        padding: 16px 8px;
+      }
+
+      h1 {
+        font-size: clamp(34px, 12vw, 56px);
+        letter-spacing: 3px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+
+      .panel {
+        padding: 16px;
+        border-radius: 26px;
+        margin: 16px auto;
+      }
+
+      a.button,
+      button {
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+
+      .bookshelf {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .book-card {
+        min-height: 200px;
+        padding: 12px;
+        border-radius: 20px;
+        box-shadow:
+          0 8px 0 #d95aa9,
+          0 0 18px rgba(255,105,210,0.5);
+      }
+
+      .book-cover {
+        height: 105px;
+        border-radius: 14px;
+      }
+
+      .book-title {
+        font-size: 14px;
+      }
+
+      .book-meta {
+        font-size: 11px;
+      }
+
+      .small-button {
+        width: auto;
+        padding: 8px 10px;
+        font-size: 11px;
+      }
     }
 
     @media (max-width: 380px) {
-      .bookshelf { grid-template-columns: 1fr; }
+      .bookshelf {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -267,6 +341,7 @@
       if (newName === null) return;
 
       const trimmed = newName.trim();
+
       if (!trimmed) {
         alert("本棚名は空にできません。");
         return;
@@ -310,7 +385,9 @@
 
         const coverImage = !isTextBook && book.images && book.images[0]
           ? '<img src="' + book.images[0] + '" alt="cover" />'
-          : isTextBook ? '<div>✍️</div>' : '<div>♡</div>';
+          : isTextBook
+            ? '<div>✍️</div>'
+            : '<div>♡</div>';
 
         const pageCount = isTextBook
           ? (book.textPages ? book.textPages.length : 0)
@@ -320,6 +397,7 @@
         const directionLabel = book.direction === "rtl" ? "右開き" : "左開き";
 
         let novelInfo = "";
+
         if (isTextBook) {
           const fontLabel = getFontLabel(book.novelFont);
           const sizeLabel = getSizeLabel(book.novelSize);
