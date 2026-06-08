@@ -184,26 +184,53 @@
     }
 
     .novel-page {
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding: 56px 58px 46px;
+      align-items: stretch;
+      justify-content: center;
+      padding: 42px 42px 38px;
       color: #3f2a36;
       overflow: hidden;
       background:
         linear-gradient(90deg, #fffdf9, #fffaf7);
     }
 
-    .novel-text {
+    .novel-columns {
       width: 100%;
       height: 100%;
       position: relative;
       z-index: 1;
-      white-space: pre-wrap;
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .novel-columns.vertical-columns {
+      flex-direction: row-reverse;
+    }
+
+    .novel-column {
+      flex: 1;
+      height: 100%;
       overflow: hidden;
-      line-height: 2.05;
+      white-space: pre-wrap;
+      color: #3f2a36;
       text-align: left;
       user-select: none;
       -webkit-user-select: none;
+    }
+
+    .vertical-columns .novel-column {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 1.72;
+      letter-spacing: 0.02em;
+      text-align: start;
+    }
+
+    .horizontal-columns .novel-column {
+      writing-mode: horizontal-tb;
+      line-height: 1.72;
+      text-align: left;
     }
 
     .font-dot {
@@ -218,17 +245,10 @@
       font-family: "Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif;
     }
 
-    .size-small { font-size: 16px; }
-    .size-medium { font-size: 18px; }
-    .size-large { font-size: 21px; }
-
-    .vertical-text {
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      line-height: 2.15;
-      letter-spacing: 0.06em;
-      text-align: start;
-    }
+    /* 1段500文字を入れるためにかなり小さめ */
+    .size-small { font-size: 10.5px; }
+    .size-medium { font-size: 11.5px; }
+    .size-large { font-size: 12.5px; }
 
     .page-number {
       position: absolute;
@@ -324,15 +344,20 @@
       }
 
       .novel-page {
-        padding: 34px 28px 30px;
+        padding: 28px 20px 26px;
       }
 
-      .size-small { font-size: 13px; }
-      .size-medium { font-size: 15px; }
-      .size-large { font-size: 17px; }
+      .novel-columns {
+        gap: 18px;
+      }
 
-      .vertical-text {
-        line-height: 2;
+      .size-small { font-size: 8.8px; }
+      .size-medium { font-size: 9.8px; }
+      .size-large { font-size: 10.8px; }
+
+      .vertical-columns .novel-column,
+      .horizontal-columns .novel-column {
+        line-height: 1.55;
       }
     }
   </style>
@@ -431,22 +456,7 @@
       `);
 
       if (isTextBook) {
-        const textPages = currentBook.textPages || [];
-        const fontClass = getFontClass(currentBook.novelFont);
-        const sizeClass = getSizeClass(currentBook.novelSize);
-
-        textPages.forEach((text, index) => {
-          const verticalClass = isRightOpening ? "vertical-text" : "";
-
-          pages.push(`
-            <div class="page">
-              <div class="page-content novel-page">
-                <div class="novel-text ${fontClass} ${sizeClass} ${verticalClass}">${escapeHtml(text)}</div>
-                <div class="page-number">${index + 1}</div>
-              </div>
-            </div>
-          `);
-        });
+        pages = pages.concat(createNovelPages());
       } else {
         const images = currentBook.images || [];
 
@@ -484,22 +494,22 @@
 
       pageFlip = new St.PageFlip(flipbookElement, {
         width: isText
-          ? (isSmallScreen ? 360 : 520)
+          ? (isSmallScreen ? 360 : 560)
           : (isSmallScreen ? 310 : 430),
         height: isText
-          ? (isSmallScreen ? 520 : 720)
+          ? (isSmallScreen ? 520 : 760)
           : (isSmallScreen ? 440 : 610),
 
         size: "stretch",
 
         minWidth: isText ? 320 : 260,
         maxWidth: isText
-          ? (isSmallScreen ? 380 : 620)
+          ? (isSmallScreen ? 380 : 660)
           : (isSmallScreen ? 330 : 520),
 
         minHeight: isText ? 460 : 360,
         maxHeight: isText
-          ? (isSmallScreen ? 560 : 820)
+          ? (isSmallScreen ? 560 : 860)
           : (isSmallScreen ? 470 : 720),
 
         showCover: true,
@@ -531,6 +541,47 @@
       });
 
       updateInfo();
+    }
+
+    function createNovelPages() {
+      const rawPages = currentBook.textPages || [];
+      const fullText = rawPages.join("\n\n");
+
+      const chunks = splitTextByLength(fullText, 500);
+      const pagePairs = [];
+
+      for (let i = 0; i < chunks.length; i += 2) {
+        pagePairs.push([chunks[i] || "", chunks[i + 1] || ""]);
+      }
+
+      const fontClass = getFontClass(currentBook.novelFont);
+      const sizeClass = getSizeClass(currentBook.novelSize);
+      const columnDirectionClass = isRightOpening ? "vertical-columns" : "horizontal-columns";
+
+      return pagePairs.map((pair, index) => {
+        return `
+          <div class="page">
+            <div class="page-content novel-page">
+              <div class="novel-columns ${columnDirectionClass}">
+                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(pair[0])}</div>
+                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(pair[1])}</div>
+              </div>
+              <div class="page-number">${index + 1}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function splitTextByLength(text, length) {
+      const cleanText = String(text).replace(/\n{3,}/g, "\n\n");
+      const result = [];
+
+      for (let i = 0; i < cleanText.length; i += length) {
+        result.push(cleanText.slice(i, i + length));
+      }
+
+      return result;
     }
 
     nextButton.addEventListener("click", () => {
