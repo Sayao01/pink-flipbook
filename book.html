@@ -159,16 +159,6 @@
       -webkit-user-select: none;
     }
 
-    .page-content::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.12), transparent 38%, rgba(122,20,86,0.05));
-      mix-blend-mode: multiply;
-    }
-
     .page-content img {
       max-width: 100%;
       max-height: 100%;
@@ -186,19 +176,12 @@
     .novel-page {
       align-items: stretch;
       justify-content: center;
-      padding: 34px 34px 34px;
+      padding: 34px;
       color: #3f2a36;
       overflow: hidden;
-      background:
-        linear-gradient(90deg, #fffdf9, #fffaf7);
+      background: linear-gradient(90deg, #fffdf9, #fffaf7);
     }
 
-    /*
-      小説ページ：
-      1ページ内で上下2段にする。
-      上段 = column1
-      下段 = column2
-    */
     .novel-columns {
       width: 100%;
       height: 100%;
@@ -286,10 +269,11 @@
       z-index: 1;
     }
 
-    .cover-sub {
+    .cover-date {
       margin-top: 18px;
       color: #8c1d63;
       font-weight: bold;
+      font-size: 18px;
       line-height: 1.8;
       position: relative;
       z-index: 1;
@@ -323,12 +307,27 @@
 
     @media (max-width: 700px) {
       .app {
-        width: 98vw;
+        width: 100vw;
         padding: 18px 0 36px;
       }
 
+      header {
+        padding: 16px 12px;
+      }
+
+      h1 {
+        font-size: 34px;
+        letter-spacing: 3px;
+      }
+
+      .subtitle {
+        font-size: 15px;
+      }
+
       .panel {
-        padding: 12px;
+        width: 94vw;
+        margin: 14px auto;
+        padding: 14px;
         border-radius: 24px;
       }
 
@@ -340,11 +339,15 @@
       }
 
       .cover-title {
-        font-size: 24px;
+        font-size: 28px;
+      }
+
+      .cover-date {
+        font-size: 15px;
       }
 
       .novel-page {
-        padding: 24px 18px 24px;
+        padding: 24px 18px;
       }
 
       .novel-columns {
@@ -369,9 +372,7 @@
   <main class="app">
     <header>
       <h1 id="bookTitle">Book</h1>
-      <p id="subtitle" class="subtitle">
-        ページの端を軽くドラッグしてめくれます♡
-      </p>
+      <p id="subtitle" class="subtitle"></p>
     </header>
 
     <section class="panel">
@@ -436,21 +437,17 @@
       const isTextBook = currentBook.type === "text";
       isRightOpening = currentBook.direction === "rtl";
 
-      const directionLabel = isRightOpening ? "右開き" : "左開き";
-      const typeLabel = isTextBook ? "文字本" : "画像本";
-
-      subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
+      subtitle.textContent = "";
 
       let pages = [];
+
+      const displayDate = currentBook.bookDate || currentBook.createdAt || "";
 
       pages.push(`
         <div class="page cover-page">
           <div class="page-content">
             <div class="cover-title">${escapeHtml(currentBook.title)}</div>
-            <div class="cover-sub">
-              ${typeLabel}<br />
-              ${directionLabel}
-            </div>
+            <div class="cover-date">${escapeHtml(displayDate)}</div>
           </div>
         </div>
       `);
@@ -490,35 +487,35 @@
       flipbookElement.innerHTML = pages.join("");
 
       const isText = currentBook.type === "text";
-      const isSmallScreen = window.innerWidth <= 700;
+      const isMobile = window.innerWidth <= 700;
 
       pageFlip = new St.PageFlip(flipbookElement, {
         width: isText
-          ? (isSmallScreen ? 360 : 560)
-          : (isSmallScreen ? 310 : 430),
+          ? (isMobile ? 330 : 560)
+          : (isMobile ? 320 : 430),
 
         height: isText
-          ? (isSmallScreen ? 520 : 760)
-          : (isSmallScreen ? 440 : 610),
+          ? (isMobile ? 480 : 760)
+          : (isMobile ? 455 : 610),
 
         size: "stretch",
 
-        minWidth: isText ? 320 : 260,
-
+        minWidth: isMobile ? 280 : 320,
         maxWidth: isText
-          ? (isSmallScreen ? 380 : 660)
-          : (isSmallScreen ? 330 : 520),
+          ? (isMobile ? 350 : 660)
+          : (isMobile ? 340 : 520),
 
-        minHeight: isText ? 460 : 360,
-
+        minHeight: isMobile ? 390 : 360,
         maxHeight: isText
-          ? (isSmallScreen ? 560 : 860)
-          : (isSmallScreen ? 470 : 720),
+          ? (isMobile ? 500 : 860)
+          : (isMobile ? 480 : 720),
 
         showCover: true,
-        usePortrait: false,
-        swipeDistance: 8,
 
+        // スマホでは1ページ表示、PCでは見開き
+        usePortrait: isMobile,
+
+        swipeDistance: 8,
         mobileScrollSupport: false,
         useMouseEvents: true,
         clickEventForward: true,
