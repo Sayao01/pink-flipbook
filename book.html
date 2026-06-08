@@ -21,6 +21,7 @@
         radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
         linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
       color: #7a1456;
+      overflow-x: hidden;
     }
 
     .sparkle {
@@ -44,18 +45,18 @@
     .app {
       position: relative;
       z-index: 1;
-      width: min(1050px, 94vw);
+      width: min(1200px, 96vw);
       margin: 0 auto;
-      padding: 36px 0 60px;
+      padding: 28px 0 50px;
     }
 
     header {
       text-align: center;
-      padding: 20px 10px;
+      padding: 16px 10px;
     }
 
     h1 {
-      font-size: clamp(34px, 7vw, 70px);
+      font-size: clamp(32px, 7vw, 68px);
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
@@ -67,15 +68,15 @@
     }
 
     .subtitle {
-      margin-top: 12px;
+      margin-top: 10px;
       color: #8c1d63;
       font-weight: bold;
       line-height: 1.7;
     }
 
     .panel {
-      margin: 24px auto;
-      padding: 26px;
+      margin: 20px auto;
+      padding: 22px;
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
@@ -110,162 +111,89 @@
       cursor: not-allowed;
     }
 
-    .book-stage {
-      position: relative;
-      width: min(920px, 95vw);
+    .book-area {
+      width: 100%;
       margin: 20px auto 0;
-      perspective: 2200px;
-      filter: drop-shadow(0 24px 30px rgba(122,20,86,0.35));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible;
     }
 
-    .book-view {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      position: relative;
-      transform-style: preserve-3d;
+    #flipbook {
+      margin: 0 auto;
     }
 
     .page {
-      min-height: 560px;
       background: #fff6fd;
-      border: 2px solid #fff;
+      border: 1px solid #ffd1ef;
+      overflow: hidden;
+    }
+
+    .page-content {
+      width: 100%;
+      height: 100%;
+      padding: 14px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,246,253,1));
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 18px;
       position: relative;
       overflow: hidden;
-      backface-visibility: hidden;
     }
 
-    .page.left {
-      border-radius: 28px 0 0 28px;
-      border-right: 1px solid #efb3dc;
-      box-shadow:
-        inset -18px 0 24px rgba(122, 20, 86, 0.16),
-        inset 0 0 24px rgba(255,255,255,0.8);
-    }
-
-    .page.right {
-      border-radius: 0 28px 28px 0;
-      border-left: 1px solid #efb3dc;
-      box-shadow:
-        inset 18px 0 24px rgba(122, 20, 86, 0.14),
-        inset 0 0 24px rgba(255,255,255,0.8);
-    }
-
-    .page::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 26%, rgba(122,20,86,0.06));
-      mix-blend-mode: multiply;
-    }
-
-    .page img {
+    .page-content img {
       max-width: 100%;
-      max-height: 500px;
+      max-height: 100%;
       object-fit: contain;
-      border-radius: 18px;
-      box-shadow: 0 10px 24px rgba(122, 20, 86, 0.22);
-      background: #fff;
-      position: relative;
-      z-index: 1;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(122,20,86,0.20);
+      background: white;
     }
 
     .page-number {
       position: absolute;
-      bottom: 12px;
-      font-size: 13px;
+      bottom: 8px;
+      right: 12px;
+      font-size: 12px;
       color: #b13a86;
+      background: rgba(255,255,255,0.75);
+      border-radius: 999px;
+      padding: 2px 8px;
       font-weight: bold;
-      z-index: 2;
     }
 
-    .empty-page {
+    .cover-page .page-content {
+      background:
+        radial-gradient(circle at top left, #fff, transparent 28%),
+        linear-gradient(135deg, #ff8ddd, #fff0fb, #ffc7ed);
+      color: #7a1456;
+      text-align: center;
+      flex-direction: column;
+      padding: 26px;
+    }
+
+    .cover-title {
+      font-size: 34px;
+      color: #fff;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 18px #ff4fc3;
+      letter-spacing: 3px;
+      line-height: 1.5;
+    }
+
+    .cover-sub {
+      margin-top: 18px;
+      color: #8c1d63;
+      font-weight: bold;
+    }
+
+    .blank {
       color: #d678b7;
       font-weight: bold;
-      text-align: center;
       line-height: 1.8;
-      z-index: 1;
-    }
-
-    .flipper {
-      position: absolute;
-      top: 0;
-      width: 50%;
-      min-height: 560px;
-      background: #fff6fd;
-      border: 2px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      overflow: hidden;
-      z-index: 10;
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-      box-shadow: 0 20px 36px rgba(122,20,86,0.28);
-      pointer-events: none;
-    }
-
-    .flipper img {
-      max-width: 100%;
-      max-height: 500px;
-      object-fit: contain;
-      border-radius: 18px;
-      box-shadow: 0 10px 24px rgba(122, 20, 86, 0.22);
-      background: #fff;
-    }
-
-    .flipper.next {
-      left: 50%;
-      border-radius: 0 28px 28px 0;
-      transform-origin: left center;
-      animation: flipNext 0.75s ease-in-out forwards;
-    }
-
-    .flipper.prev {
-      left: 0;
-      border-radius: 28px 0 0 28px;
-      transform-origin: right center;
-      animation: flipPrev 0.75s ease-in-out forwards;
-    }
-
-    .flipper::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.25), transparent 35%, rgba(122,20,86,0.18));
-      pointer-events: none;
-    }
-
-    @keyframes flipNext {
-      0% {
-        transform: rotateY(0deg);
-      }
-      45% {
-        box-shadow: -18px 18px 32px rgba(122,20,86,0.32);
-      }
-      100% {
-        transform: rotateY(-180deg);
-      }
-    }
-
-    @keyframes flipPrev {
-      0% {
-        transform: rotateY(0deg);
-      }
-      45% {
-        box-shadow: 18px 18px 32px rgba(122,20,86,0.32);
-      }
-      100% {
-        transform: rotateY(180deg);
-      }
     }
 
     .controls {
@@ -287,40 +215,18 @@
     }
 
     @media (max-width: 700px) {
-      .book-view {
-        grid-template-columns: 1fr;
-      }
-
-      .page.left {
-        display: none;
-      }
-
-      .page.right {
-        border-radius: 28px;
-      }
-
-      .page {
-        min-height: 480px;
-      }
-
-      .book-stage {
-        perspective: 1600px;
-      }
-
-      .flipper {
-        width: 100%;
-        left: 0 !important;
-        min-height: 480px;
-        border-radius: 28px;
-        transform-origin: left center;
-      }
-
-      .flipper.prev {
-        transform-origin: right center;
-      }
-
       .panel {
-        padding: 18px;
+        padding: 14px;
+      }
+
+      a.button,
+      button {
+        padding: 11px 18px;
+        font-size: 13px;
+      }
+
+      .cover-title {
+        font-size: 24px;
       }
     }
   </style>
@@ -332,7 +238,7 @@
   <main class="app">
     <header>
       <h1 id="bookTitle">Pink Flipbook</h1>
-      <p class="subtitle">ページをぺらっとめくって読めます♡</p>
+      <p class="subtitle">紙みたいにページをめくれます♡</p>
     </header>
 
     <section class="panel">
@@ -344,15 +250,8 @@
       </div>
 
       <div id="readerArea">
-        <div class="book-stage" id="bookStage">
-          <div id="bookView" class="book-view">
-            <div class="page left" id="leftPage">
-              <div class="empty-page">左ページ</div>
-            </div>
-            <div class="page right" id="rightPage">
-              <div class="empty-page">右ページ</div>
-            </div>
-          </div>
+        <div class="book-area">
+          <div id="flipbook"></div>
         </div>
 
         <div class="controls">
@@ -365,14 +264,13 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+
   <script>
     const bookTitle = document.getElementById("bookTitle");
     const missingMessage = document.getElementById("missingMessage");
     const readerArea = document.getElementById("readerArea");
-
-    const bookStage = document.getElementById("bookStage");
-    const leftPage = document.getElementById("leftPage");
-    const rightPage = document.getElementById("rightPage");
+    const flipbookElement = document.getElementById("flipbook");
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
     const pageInfo = document.getElementById("pageInfo");
@@ -383,8 +281,7 @@
     const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
     const currentBook = books.find((book) => book.id === bookId);
 
-    let currentSpread = 0;
-    let isTurning = false;
+    let pageFlip = null;
 
     if (!currentBook) {
       bookTitle.textContent = "Not Found";
@@ -392,88 +289,102 @@
       readerArea.style.display = "none";
     } else {
       bookTitle.textContent = currentBook.title;
-      renderCurrentBook();
+      createFlipbook();
+    }
+
+    function createFlipbook() {
+      const pages = [];
+
+      pages.push(`
+        <div class="page cover-page">
+          <div class="page-content">
+            <div class="cover-title">${escapeHtml(currentBook.title)}</div>
+            <div class="cover-sub">Pink Flipbook ♡</div>
+          </div>
+        </div>
+      `);
+
+      currentBook.images.forEach((src, index) => {
+        pages.push(`
+          <div class="page">
+            <div class="page-content">
+              <img src="${src}" alt="page ${index + 1}" />
+              <div class="page-number">${index + 1}</div>
+            </div>
+          </div>
+        `);
+      });
+
+      if (pages.length % 2 !== 0) {
+        pages.push(`
+          <div class="page">
+            <div class="page-content">
+              <div class="blank">Blank page ♡</div>
+            </div>
+          </div>
+        `);
+      }
+
+      flipbookElement.innerHTML = pages.join("");
+
+      pageFlip = new St.PageFlip(flipbookElement, {
+        width: 430,
+        height: 600,
+        size: "stretch",
+        minWidth: 300,
+        maxWidth: 520,
+        minHeight: 420,
+        maxHeight: 720,
+        maxShadowOpacity: 0.55,
+        showCover: true,
+        mobileScrollSupport: false,
+        useMouseEvents: true,
+        flippingTime: 900,
+        drawShadow: true,
+        usePortrait: true,
+        startPage: 0
+      });
+
+      pageFlip.loadFromHTML(document.querySelectorAll(".page"));
+
+      pageFlip.on("flip", () => {
+        updateInfo();
+      });
+
+      updateInfo();
     }
 
     prevButton.addEventListener("click", () => {
-      if (!currentBook || isTurning || currentSpread === 0) return;
-
-      turnPage("prev");
+      if (!pageFlip) return;
+      pageFlip.flipPrev();
+      setTimeout(updateInfo, 300);
     });
 
     nextButton.addEventListener("click", () => {
-      if (!currentBook || isTurning) return;
-
-      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
-      if (currentSpread >= maxSpread) return;
-
-      turnPage("next");
+      if (!pageFlip) return;
+      pageFlip.flipNext();
+      setTimeout(updateInfo, 300);
     });
 
-    function turnPage(direction) {
-      isTurning = true;
-      updateButtons();
+    function updateInfo() {
+      if (!pageFlip) return;
 
-      const flip = document.createElement("div");
-      flip.className = "flipper " + direction;
+      const current = pageFlip.getCurrentPageIndex();
+      const total = pageFlip.getPageCount();
 
-      if (direction === "next") {
-        const rightIndex = currentSpread * 2 + 1;
-        flip.innerHTML = createPageContent(currentBook.images[rightIndex], rightIndex);
-      } else {
-        const leftIndex = currentSpread * 2;
-        flip.innerHTML = createPageContent(currentBook.images[leftIndex], leftIndex);
-      }
+      pageInfo.textContent = `${current + 1} / ${total} pages`;
 
-      bookStage.appendChild(flip);
-
-      setTimeout(() => {
-        if (direction === "next") {
-          currentSpread++;
-        } else {
-          currentSpread--;
-        }
-
-        renderCurrentBook();
-        flip.remove();
-        isTurning = false;
-        updateButtons();
-      }, 760);
+      prevButton.disabled = current === 0;
+      nextButton.disabled = current >= total - 1;
     }
 
-    function renderCurrentBook() {
-      if (!currentBook) return;
-
-      const leftIndex = currentSpread * 2;
-      const rightIndex = leftIndex + 1;
-
-      leftPage.innerHTML = createPageContent(currentBook.images[leftIndex], leftIndex);
-      rightPage.innerHTML = createPageContent(currentBook.images[rightIndex], rightIndex);
-
-      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
-      pageInfo.textContent = `${currentSpread + 1} / ${maxSpread + 1} 見開き`;
-
-      updateButtons();
-    }
-
-    function updateButtons() {
-      if (!currentBook) return;
-
-      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
-
-      prevButton.disabled = isTurning || currentSpread === 0;
-      nextButton.disabled = isTurning || currentSpread === maxSpread;
-    }
-
-    function createPageContent(src, index) {
-      if (!src) {
-        return `<div class="empty-page">Blank page ♡</div>`;
-      }
-
-      return `
-        <img src="${src}" alt="page ${index + 1}" />
-        <div class="page-number">${index + 1}</div>
-      `;
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
   </script>
 </body>
