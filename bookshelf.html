@@ -38,12 +38,8 @@
     }
 
     @keyframes glitter {
-      from {
-        transform: translateY(0);
-      }
-      to {
-        transform: translateY(-80px);
-      }
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
     }
 
     .app {
@@ -144,7 +140,7 @@
     }
 
     .book-card {
-      min-height: 220px;
+      min-height: 230px;
       padding: 18px;
       border-radius: 24px;
       border: 3px solid #fff;
@@ -256,12 +252,9 @@
       }
 
       .book-card {
-        min-height: 200px;
+        min-height: 215px;
         padding: 12px;
         border-radius: 20px;
-        box-shadow:
-          0 8px 0 #d95aa9,
-          0 0 18px rgba(255,105,210,0.5);
       }
 
       .book-cover {
@@ -416,6 +409,7 @@
 
           <div class="book-actions">
             <a class="button small-button" href="book.html?id=${book.id}">開く</a>
+            <a class="button small-button" href="edit.html?id=${book.id}">編集</a>
             <button class="small-button" data-delete="${book.id}">消す</button>
           </div>
         `;
