@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Book - Pink Flipbook</title>
+  <title>Read Book - Pink Flipbook</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
@@ -44,14 +44,14 @@
     .app {
       position: relative;
       z-index: 1;
-      width: min(900px, 94vw);
+      width: min(1050px, 94vw);
       margin: 0 auto;
       padding: 36px 0 60px;
     }
 
     header {
       text-align: center;
-      padding: 24px 10px;
+      padding: 20px 10px;
     }
 
     h1 {
@@ -63,6 +63,7 @@
         0 4px 0 #d95aa9,
         0 0 18px #ff4fc3,
         0 0 36px #fff;
+      word-break: break-word;
     }
 
     .subtitle {
@@ -74,7 +75,7 @@
 
     .panel {
       margin: 24px auto;
-      padding: 28px;
+      padding: 26px;
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
@@ -86,8 +87,7 @@
     }
 
     a.button,
-    button,
-    .upload-label {
+    button {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
@@ -105,26 +105,70 @@
       font-size: 15px;
     }
 
-    input[type="file"] {
-      display: none;
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
-    input[type="text"] {
-      width: min(480px, 90vw);
-      padding: 15px 18px;
-      border-radius: 999px;
+    .book-view {
+      width: min(920px, 95vw);
+      margin: 20px auto 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      perspective: 1600px;
+      filter: drop-shadow(0 24px 30px rgba(122,20,86,0.35));
+    }
+
+    .page {
+      min-height: 560px;
+      background: #fff6fd;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.78);
-      color: #7a1456;
-      font-family: "DotGothic16", sans-serif;
-      font-size: 15px;
-      outline: none;
-      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.5);
-      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
     }
 
-    input[type="text"]::placeholder {
-      color: #c55c9e;
+    .page.left {
+      border-radius: 28px 0 0 28px;
+      border-right: 1px solid #efb3dc;
+      box-shadow: inset -16px 0 22px rgba(122, 20, 86, 0.12);
+    }
+
+    .page.right {
+      border-radius: 0 28px 28px 0;
+      border-left: 1px solid #efb3dc;
+      box-shadow: inset 16px 0 22px rgba(122, 20, 86, 0.12);
+    }
+
+    .page img {
+      max-width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(122, 20, 86, 0.22);
+      background: #fff;
+    }
+
+    .page-number {
+      position: absolute;
+      bottom: 12px;
+      font-size: 13px;
+      color: #b13a86;
+      font-weight: bold;
+    }
+
+    .empty-page {
+      color: #d678b7;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .controls {
+      margin-top: 24px;
     }
 
     .hint {
@@ -134,43 +178,63 @@
       font-size: 14px;
     }
 
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 14px;
-      margin-top: 22px;
+    .turning-right {
+      animation: turnRight 0.45s ease;
     }
 
-    .preview {
-      height: 130px;
-      border-radius: 18px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.5);
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 8px 18px rgba(122, 20, 86, 0.18);
+    .turning-left {
+      animation: turnLeft 0.45s ease;
     }
 
-    .preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    @keyframes turnRight {
+      from {
+        transform: rotateY(0deg);
+        opacity: 0.75;
+      }
+      to {
+        transform: rotateY(-8deg);
+        opacity: 1;
+      }
     }
 
-    .preview span {
-      position: absolute;
-      bottom: 6px;
-      right: 8px;
-      background: rgba(255,255,255,0.8);
-      color: #b13a86;
-      border-radius: 999px;
-      padding: 2px 8px;
-      font-size: 12px;
+    @keyframes turnLeft {
+      from {
+        transform: rotateY(0deg);
+        opacity: 0.75;
+      }
+      to {
+        transform: rotateY(8deg);
+        opacity: 1;
+      }
+    }
+
+    .missing {
+      padding: 38px 12px;
+      color: #9d2a72;
       font-weight: bold;
+      line-height: 1.9;
     }
 
-    .danger {
-      color: #b71970;
+    @media (max-width: 700px) {
+      .book-view {
+        grid-template-columns: 1fr;
+      }
+
+      .page.left {
+        display: none;
+      }
+
+      .page.right {
+        border-radius: 28px;
+      }
+
+      .page {
+        min-height: 480px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
     }
   </style>
 </head>
@@ -180,112 +244,119 @@
 
   <main class="app">
     <header>
-      <h1>Create Book</h1>
-      <p class="subtitle">画像を選んだ順番で、1冊の本にします♡</p>
+      <h1 id="bookTitle">Pink Flipbook</h1>
+      <p class="subtitle">ページをめくって読めます♡</p>
     </header>
 
     <section class="panel">
       <a class="button" href="index.html">← 本棚に戻る</a>
 
-      <div>
-        <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
+      <div id="missingMessage" class="missing" style="display:none;">
+        本が見つかりませんでした。<br />
+        本棚からもう一度開いてください。
       </div>
 
-      <div>
-        <label class="upload-label" for="imageInput">画像を選ぶ</label>
-        <input id="imageInput" type="file" accept="image/*" multiple />
+      <div id="readerArea">
+        <div id="bookView" class="book-view">
+          <div class="page left" id="leftPage">
+            <div class="empty-page">左ページ</div>
+          </div>
+          <div class="page right" id="rightPage">
+            <div class="empty-page">右ページ</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="prevButton" type="button">← 前のページ</button>
+          <button id="nextButton" type="button">次のページ →</button>
+        </div>
+
+        <p id="pageInfo" class="hint"></p>
       </div>
-
-      <p id="selectedInfo" class="hint">
-        まだ画像が選ばれていません。
-      </p>
-
-      <button id="saveBookButton" type="button">本棚に追加する</button>
-
-      <p class="hint danger">
-        今は試作品なので、このブラウザの中にだけ保存されます。<br />
-        Googleログインとネット保存はあとで追加します。
-      </p>
-
-      <div id="previewGrid" class="preview-grid"></div>
     </section>
   </main>
 
   <script>
-    const bookTitleInput = document.getElementById("bookTitleInput");
-    const imageInput = document.getElementById("imageInput");
-    const selectedInfo = document.getElementById("selectedInfo");
-    const saveBookButton = document.getElementById("saveBookButton");
-    const previewGrid = document.getElementById("previewGrid");
+    const bookTitle = document.getElementById("bookTitle");
+    const missingMessage = document.getElementById("missingMessage");
+    const readerArea = document.getElementById("readerArea");
 
-    let selectedImages = [];
+    const bookView = document.getElementById("bookView");
+    const leftPage = document.getElementById("leftPage");
+    const rightPage = document.getElementById("rightPage");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+    const pageInfo = document.getElementById("pageInfo");
 
-    imageInput.addEventListener("change", async (event) => {
-      const files = Array.from(event.target.files);
+    const params = new URLSearchParams(window.location.search);
+    const bookId = params.get("id");
 
-      selectedImages = await Promise.all(
-        files.map((file) => {
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
+    const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+    const currentBook = books.find((book) => book.id === bookId);
 
-      renderPreview();
+    let currentSpread = 0;
+
+    if (!currentBook) {
+      bookTitle.textContent = "Not Found";
+      missingMessage.style.display = "block";
+      readerArea.style.display = "none";
+    } else {
+      bookTitle.textContent = currentBook.title;
+      renderCurrentBook();
+    }
+
+    prevButton.addEventListener("click", () => {
+      if (currentSpread > 0) {
+        currentSpread--;
+        animateBook("turning-left");
+        renderCurrentBook();
+      }
     });
 
-    saveBookButton.addEventListener("click", () => {
-      const title = bookTitleInput.value.trim();
+    nextButton.addEventListener("click", () => {
+      if (!currentBook) return;
 
-      if (!title) {
-        alert("本のタイトルを入れてください。");
-        return;
+      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
+
+      if (currentSpread < maxSpread) {
+        currentSpread++;
+        animateBook("turning-right");
+        renderCurrentBook();
       }
-
-      if (selectedImages.length === 0) {
-        alert("画像を選んでください。");
-        return;
-      }
-
-      const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
-
-      const newBook = {
-        id: Date.now().toString(),
-        title: title,
-        images: selectedImages,
-        createdAt: new Date().toLocaleString("ja-JP")
-      };
-
-      books.unshift(newBook);
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
-
-      alert("本棚に追加しました♡");
-      window.location.href = "index.html";
     });
 
-    function renderPreview() {
-      previewGrid.innerHTML = "";
+    function renderCurrentBook() {
+      if (!currentBook) return;
 
-      if (selectedImages.length === 0) {
-        selectedInfo.textContent = "まだ画像が選ばれていません。";
-        return;
+      const leftIndex = currentSpread * 2;
+      const rightIndex = leftIndex + 1;
+
+      leftPage.innerHTML = createPageContent(currentBook.images[leftIndex], leftIndex);
+      rightPage.innerHTML = createPageContent(currentBook.images[rightIndex], rightIndex);
+
+      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
+
+      prevButton.disabled = currentSpread === 0;
+      nextButton.disabled = currentSpread === maxSpread;
+
+      pageInfo.textContent = `${currentSpread + 1} / ${maxSpread + 1} 見開き`;
+    }
+
+    function createPageContent(src, index) {
+      if (!src) {
+        return `<div class="empty-page">Blank page ♡</div>`;
       }
 
-      selectedInfo.textContent = selectedImages.length + "枚の画像を選びました。";
+      return `
+        <img src="${src}" alt="page ${index + 1}" />
+        <div class="page-number">${index + 1}</div>
+      `;
+    }
 
-      selectedImages.forEach((src, index) => {
-        const item = document.createElement("div");
-        item.className = "preview";
-
-        item.innerHTML = `
-          <img src="${src}" alt="preview ${index + 1}" />
-          <span>${index + 1}</span>
-        `;
-
-        previewGrid.appendChild(item);
-      });
+    function animateBook(className) {
+      bookView.classList.remove("turning-right", "turning-left");
+      void bookView.offsetWidth;
+      bookView.classList.add(className);
     }
   </script>
 </body>
