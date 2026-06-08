@@ -224,7 +224,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
     }
 
@@ -238,29 +238,47 @@
       font-weight: bold;
     }
 
+    .columns-editor {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .column-box {
+      background: rgba(255,255,255,0.45);
+      border: 2px solid #fff;
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    .column-label {
+      color: #9d2a72;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
     textarea {
       width: 100%;
-      min-height: 420px;
-      padding: 28px;
+      height: 360px;
+      padding: 18px;
       border-radius: 18px;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.9);
       color: #3f2435;
       font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif;
-      font-size: 17px;
-      line-height: 2.1;
+      font-size: 15px;
+      line-height: 1.9;
       outline: none;
       resize: vertical;
-      box-shadow:
-        inset 0 0 12px rgba(255, 141, 221, 0.45);
+      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.45);
     }
 
     textarea.vertical-input {
-      height: 520px;
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      line-height: 2.1;
-      letter-spacing: 0.06em;
+      line-height: 2;
+      letter-spacing: 0.04em;
       overflow-x: auto;
       overflow-y: hidden;
       text-align: start;
@@ -270,6 +288,14 @@
       writing-mode: horizontal-tb;
       overflow-y: auto;
       text-align: left;
+    }
+
+    .counter {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+      color: #9d2a72;
+      font-weight: bold;
     }
 
     .small-button {
@@ -312,14 +338,13 @@
         width: 100%;
       }
 
-      textarea {
-        min-height: 360px;
-        font-size: 15px;
-        padding: 22px;
+      .columns-editor {
+        grid-template-columns: 1fr;
       }
 
-      textarea.vertical-input {
-        height: 440px;
+      textarea {
+        height: 320px;
+        font-size: 14px;
       }
 
       .preview-grid {
@@ -394,8 +419,8 @@
           <h2 class="section-title">TEXT PAGES</h2>
 
           <p class="hint">
-            ページごとに本文を編集できます。<br />
-            右開きの場合、入力欄も縦書きになります。
+            小説は1ページ2段組です。<br />
+            各段は500文字まで編集できます。
           </p>
 
           <div id="pageList" class="page-list"></div>
@@ -468,7 +493,7 @@
       direction = currentBook.direction || "ltr";
 
       images = currentBook.images ? [...currentBook.images] : [];
-      textPages = currentBook.textPages ? [...currentBook.textPages] : [""];
+      textPages = normalizeTextPages(currentBook.textPages || []);
 
       novelFont = currentBook.novelFont || "serif";
       novelSize = currentBook.novelSize || "medium";
@@ -557,7 +582,7 @@
 
     addPageButton.addEventListener("click", () => {
       saveCurrentText();
-      textPages.push("");
+      textPages.push({ column1: "", column2: "" });
       renderTextPages();
     });
 
@@ -587,8 +612,11 @@
         saveCurrentText();
 
         const cleanedPages = textPages
-          .map((page) => page.trim())
-          .filter((page) => page.length > 0);
+          .map((page) => ({
+            column1: page.column1.trim(),
+            column2: page.column2.trim()
+          }))
+          .filter((page) => page.column1.length > 0 || page.column2.length > 0);
 
         if (cleanedPages.length === 0) {
           alert("本文を書いてください。");
@@ -644,7 +672,7 @@
 
       pageList.innerHTML = "";
 
-      textPages.forEach((text, index) => {
+      textPages.forEach((pageData, index) => {
         const page = document.createElement("div");
         page.className = "page-editor";
 
@@ -656,7 +684,19 @@
             <button class="small-button" data-delete-text="${index}" type="button">このページを消す</button>
           </div>
 
-          <textarea class="${inputClass}" data-page="${index}" placeholder="ここに${index + 1}ページ目の本文を書く">${escapeHtml(text)}</textarea>
+          <div class="columns-editor">
+            <div class="column-box">
+              <div class="column-label">1段目 / 500文字</div>
+              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
+              <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
+            </div>
+
+            <div class="column-box">
+              <div class="column-label">2段目 / 500文字</div>
+              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
+              <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
+            </div>
+          </div>
         `;
 
         pageList.appendChild(page);
@@ -677,14 +717,60 @@
         });
       });
 
+      document.querySelectorAll("textarea").forEach((textarea) => {
+        textarea.addEventListener("input", () => {
+          const pageIndex = textarea.getAttribute("data-page");
+          const column = textarea.getAttribute("data-column");
+          const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
+          counter.textContent = textarea.value.length + " / 500";
+        });
+      });
+
       applyTextAreaStyle();
     }
 
     function saveCurrentText() {
-      document.querySelectorAll("[data-page]").forEach((textarea) => {
+      document.querySelectorAll("textarea[data-page]").forEach((textarea) => {
         const index = Number(textarea.getAttribute("data-page"));
-        textPages[index] = textarea.value;
+        const column = textarea.getAttribute("data-column");
+
+        if (!textPages[index]) {
+          textPages[index] = { column1: "", column2: "" };
+        }
+
+        textPages[index][column] = textarea.value;
       });
+    }
+
+    function normalizeTextPages(rawPages) {
+      if (rawPages.length === 0) {
+        return [{ column1: "", column2: "" }];
+      }
+
+      if (typeof rawPages[0] === "object") {
+        return rawPages.map((page) => ({
+          column1: page.column1 || "",
+          column2: page.column2 || ""
+        }));
+      }
+
+      const joinedText = rawPages.join("\n\n");
+      const chunks = [];
+
+      for (let i = 0; i < joinedText.length; i += 500) {
+        chunks.push(joinedText.slice(i, i + 500));
+      }
+
+      const pages = [];
+
+      for (let i = 0; i < chunks.length; i += 2) {
+        pages.push({
+          column1: chunks[i] || "",
+          column2: chunks[i + 1] || ""
+        });
+      }
+
+      return pages.length ? pages : [{ column1: "", column2: "" }];
     }
 
     function updateDirectionButtons() {
@@ -718,9 +804,9 @@
     }
 
     function getFontSize(size) {
-      if (size === "small") return "15px";
-      if (size === "large") return "20px";
-      return "17px";
+      if (size === "small") return "13px";
+      if (size === "large") return "16px";
+      return "14.5px";
     }
 
     function escapeHtml(text) {
