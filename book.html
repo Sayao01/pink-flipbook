@@ -452,25 +452,30 @@
 
       flipbookElement.innerHTML = pages.join("");
 
-      pageFlip = new St.PageFlip(flipbookElement, {
-        width: 430,
-        height: 610,
-        size: "stretch",
-        minWidth: 300,
-        maxWidth: 520,
-        minHeight: 430,
-        maxHeight: 720,
+      const isMobile = window.innerWidth <= 700;
 
-        showCover: true,
-        usePortrait: true,
-        mobileScrollSupport: false,
-        useMouseEvents: true,
+pageFlip = new St.PageFlip(flipbookElement, {
+  width: 380,
+  height: 540,
+  size: "stretch",
+  minWidth: 280,
+  maxWidth: 420,
+  minHeight: 400,
+  maxHeight: 620,
 
-        drawShadow: true,
-        maxShadowOpacity: 0.8,
-        flippingTime: 1100,
-        startZIndex: 10,
-        startPage: 0
+  showCover: true,
+
+  // PC・タブレットでは見開き、スマホだけ1ページ表示
+  usePortrait: isMobile,
+
+  mobileScrollSupport: false,
+  useMouseEvents: true,
+
+  drawShadow: true,
+  maxShadowOpacity: 0.8,
+  flippingTime: 1100,
+  startZIndex: 10,
+  startPage: 0
       });
 
       pageFlip.loadFromHTML(document.querySelectorAll(".page"));
