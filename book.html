@@ -186,49 +186,51 @@
     .novel-page {
       align-items: stretch;
       justify-content: center;
-      padding: 42px 42px 38px;
+      padding: 34px 34px 34px;
       color: #3f2a36;
       overflow: hidden;
       background:
         linear-gradient(90deg, #fffdf9, #fffaf7);
     }
 
+    /*
+      小説ページ：
+      1ページ内で上下2段にする。
+      上段 = column1
+      下段 = column2
+    */
     .novel-columns {
       width: 100%;
       height: 100%;
       position: relative;
       z-index: 1;
-      display: flex;
-      gap: 28px;
-      justify-content: center;
-      align-items: stretch;
-    }
-
-    .novel-columns.vertical-columns {
-      flex-direction: row-reverse;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 20px;
     }
 
     .novel-column {
-      flex: 1;
+      width: 100%;
       height: 100%;
       overflow: hidden;
       white-space: pre-wrap;
       color: #3f2a36;
       user-select: none;
       -webkit-user-select: none;
+      padding: 4px 10px;
     }
 
     .vertical-columns .novel-column {
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      line-height: 1.72;
-      letter-spacing: 0.02em;
+      line-height: 1.55;
+      letter-spacing: 0.01em;
       text-align: start;
     }
 
     .horizontal-columns .novel-column {
       writing-mode: horizontal-tb;
-      line-height: 1.72;
+      line-height: 1.65;
       text-align: left;
     }
 
@@ -244,9 +246,9 @@
       font-family: "Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif;
     }
 
-    .size-small { font-size: 10.5px; }
-    .size-medium { font-size: 11.5px; }
-    .size-large { font-size: 12.5px; }
+    .size-small { font-size: 9.2px; }
+    .size-medium { font-size: 10.2px; }
+    .size-large { font-size: 11.2px; }
 
     .page-number {
       position: absolute;
@@ -342,20 +344,20 @@
       }
 
       .novel-page {
-        padding: 28px 20px 26px;
+        padding: 24px 18px 24px;
       }
 
       .novel-columns {
-        gap: 18px;
+        gap: 14px;
       }
 
-      .size-small { font-size: 8.8px; }
-      .size-medium { font-size: 9.8px; }
-      .size-large { font-size: 10.8px; }
+      .size-small { font-size: 8px; }
+      .size-medium { font-size: 8.8px; }
+      .size-large { font-size: 9.6px; }
 
       .vertical-columns .novel-column,
       .horizontal-columns .novel-column {
-        line-height: 1.55;
+        line-height: 1.45;
       }
     }
   </style>
@@ -494,6 +496,7 @@
         width: isText
           ? (isSmallScreen ? 360 : 560)
           : (isSmallScreen ? 310 : 430),
+
         height: isText
           ? (isSmallScreen ? 520 : 760)
           : (isSmallScreen ? 440 : 610),
@@ -501,11 +504,13 @@
         size: "stretch",
 
         minWidth: isText ? 320 : 260,
+
         maxWidth: isText
           ? (isSmallScreen ? 380 : 660)
           : (isSmallScreen ? 330 : 520),
 
         minHeight: isText ? 460 : 360,
+
         maxHeight: isText
           ? (isSmallScreen ? 560 : 860)
           : (isSmallScreen ? 470 : 720),
