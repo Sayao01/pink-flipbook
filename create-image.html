@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Image Book - Pink Flipbook</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DotGothic16", sans-serif;
+      background:
+        radial-gradient(circle at top left, #fff0fb, transparent 28%),
+        radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
+        linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
+      color: #7a1456;
+    }
+
+    .sparkle {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle, rgba(255,255,255,0.7) 0 1px, transparent 2px);
+      background-size: 90px 90px, 50px 50px;
+      animation: glitter 8s linear infinite;
+      opacity: 0.65;
+      z-index: 0;
+    }
+
+    @keyframes glitter {
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(900px, 94vw);
+      margin: 0 auto;
+      padding: 36px 0 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
+
+    h1 {
+      font-size: clamp(34px, 7vw, 70px);
+      margin: 0;
+      color: #fff;
+      letter-spacing: 5px;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+    }
+
+    .panel {
+      margin: 24px auto;
+      padding: 28px;
+      border-radius: 32px;
+      border: 3px solid rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.46);
+      box-shadow:
+        0 0 30px rgba(255, 105, 210, 0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    a.button,
+    button,
+    .upload-label {
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      margin: 8px;
+      padding: 13px 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #ff9bdf);
+      border: 2px solid #fff;
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255, 141, 221, 0.9);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    input[type="text"] {
+      width: min(520px, 90vw);
+      padding: 15px 18px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.78);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-size: 15px;
+      outline: none;
+      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.5);
+      margin: 12px 0;
+    }
+
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .preview {
+      height: 130px;
+      border-radius: 18px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.5);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 8px 18px rgba(122, 20, 86, 0.18);
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview span {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      background: rgba(255,255,255,0.8);
+      color: #b13a86;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sparkle"></div>
+
+  <main class="app">
+    <header>
+      <h1>Image Book</h1>
+      <p class="subtitle">画像を追加した順番で、本のページになります♡</p>
+    </header>
+
+    <section class="panel">
+      <a class="button" href="create.html">← 種類選択に戻る</a>
+      <a class="button" href="index.html">本棚に戻る</a>
+
+      <div>
+        <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
+      </div>
+
+      <div>
+        <label class="upload-label" for="imageInput">画像を選ぶ</label>
+        <input id="imageInput" type="file" accept="image/*" multiple />
+      </div>
+
+      <p id="selectedInfo" class="hint">
+        まだ画像が選ばれていません。
+      </p>
+
+      <button id="saveBookButton" type="button">画像本を本棚に追加する</button>
+
+      <p class="hint">
+        今は試作品なので、このブラウザの中にだけ保存されます。
+      </p>
+
+      <div id="previewGrid" class="preview-grid"></div>
+    </section>
+  </main>
+
+  <script>
+    const bookTitleInput = document.getElementById("bookTitleInput");
+    const imageInput = document.getElementById("imageInput");
+    const selectedInfo = document.getElementById("selectedInfo");
+    const saveBookButton = document.getElementById("saveBookButton");
+    const previewGrid = document.getElementById("previewGrid");
+
+    let selectedImages = [];
+
+    imageInput.addEventListener("change", async (event) => {
+      const files = Array.from(event.target.files);
+
+      selectedImages = await Promise.all(
+        files.map((file) => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      renderPreview();
+    });
+
+    saveBookButton.addEventListener("click", () => {
+      const title = bookTitleInput.value.trim();
+
+      if (!title) {
+        alert("本のタイトルを入れてください。");
+        return;
+      }
+
+      if (selectedImages.length === 0) {
+        alert("画像を選んでください。");
+        return;
+      }
+
+      const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+
+      const newBook = {
+        id: Date.now().toString(),
+        title: title,
+        type: "image",
+        images: selectedImages,
+        textPages: [],
+        createdAt: new Date().toLocaleString("ja-JP")
+      };
+
+      books.unshift(newBook);
+      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+
+      alert("画像本を本棚に追加しました♡");
+      window.location.href = "index.html";
+    });
+
+    function renderPreview() {
+      previewGrid.innerHTML = "";
+
+      if (selectedImages.length === 0) {
+        selectedInfo.textContent = "まだ画像が選ばれていません。";
+        return;
+      }
+
+      selectedInfo.textContent = selectedImages.length + "枚の画像を選びました。";
+
+      selectedImages.forEach((src, index) => {
+        const item = document.createElement("div");
+        item.className = "preview";
+
+        item.innerHTML = `
+          <img src="${src}" alt="preview ${index + 1}" />
+          <span>${index + 1}</span>
+        `;
+
+        previewGrid.appendChild(item);
+      });
+    }
+  </script>
+</body>
+</html>
