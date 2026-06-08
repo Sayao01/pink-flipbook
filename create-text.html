@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Text Book - Pink Flipbook</title>
+  <title>Create Text Book</title>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Kosugi+Maru&display=swap');
+
     * { box-sizing: border-box; }
 
     body {
@@ -46,7 +47,10 @@
       padding: 36px 0 60px;
     }
 
-    header { text-align: center; padding: 24px 10px; }
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
 
     h1 {
       font-size: clamp(34px, 7vw, 70px);
@@ -56,7 +60,12 @@
       text-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff4fc3, 0 0 36px #fff;
     }
 
-    .subtitle { margin-top: 12px; color: #8c1d63; font-weight: bold; line-height: 1.7; }
+    .subtitle {
+      margin-top: 12px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+    }
 
     .panel {
       margin: 24px auto;
@@ -64,7 +73,9 @@
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
-      box-shadow: 0 0 30px rgba(255,105,210,0.45), inset 0 0 18px rgba(255,255,255,0.65);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
       backdrop-filter: blur(12px);
       text-align: center;
     }
@@ -99,7 +110,7 @@
       margin: 12px 0;
     }
 
-    .direction-box {
+    .choice-box {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
@@ -107,7 +118,7 @@
       margin: 14px 0;
     }
 
-    .direction-card {
+    .choice-card {
       cursor: pointer;
       width: 170px;
       padding: 14px;
@@ -118,12 +129,17 @@
       font-weight: bold;
     }
 
-    .direction-card.active {
+    .choice-card.active {
       background: linear-gradient(135deg, #fff, #ff9bdf);
       transform: translateY(-3px);
     }
 
-    .hint { color: #9d2a72; font-weight: bold; line-height: 1.8; font-size: 14px; }
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+    }
 
     .page-list {
       display: grid;
@@ -184,7 +200,7 @@
     @media (max-width: 700px) {
       .panel { padding: 18px; }
       a.button, button { width: 100%; }
-      .direction-card { width: 100%; }
+      .choice-card { width: 100%; }
       textarea { min-height: 220px; font-size: 14px; }
     }
   </style>
@@ -209,9 +225,25 @@
 
       <p class="hint">開き方を選んでください。</p>
 
-      <div class="direction-box">
-        <div id="rtlButton" class="direction-card active">右開き<br />縦書き</div>
-        <div id="ltrButton" class="direction-card">左開き<br />横書き</div>
+      <div class="choice-box">
+        <div id="rtlButton" class="choice-card active">右開き<br />縦書き</div>
+        <div id="ltrButton" class="choice-card">左開き<br />横書き</div>
+      </div>
+
+      <p class="hint">フォントを選んでください。</p>
+
+      <div class="choice-box">
+        <div id="fontDotButton" class="choice-card active">ドット</div>
+        <div id="fontSerifButton" class="choice-card">明朝</div>
+        <div id="fontMaruButton" class="choice-card">丸ゴ</div>
+      </div>
+
+      <p class="hint">文字サイズを選んでください。</p>
+
+      <div class="choice-box">
+        <div id="sizeSmallButton" class="choice-card">小</div>
+        <div id="sizeMediumButton" class="choice-card active">中</div>
+        <div id="sizeLargeButton" class="choice-card">大</div>
       </div>
 
       <p class="hint">
@@ -237,8 +269,18 @@
     const rtlButton = document.getElementById("rtlButton");
     const ltrButton = document.getElementById("ltrButton");
 
+    const fontDotButton = document.getElementById("fontDotButton");
+    const fontSerifButton = document.getElementById("fontSerifButton");
+    const fontMaruButton = document.getElementById("fontMaruButton");
+
+    const sizeSmallButton = document.getElementById("sizeSmallButton");
+    const sizeMediumButton = document.getElementById("sizeMediumButton");
+    const sizeLargeButton = document.getElementById("sizeLargeButton");
+
     let pages = [""];
     let direction = "rtl";
+    let novelFont = "dot";
+    let novelSize = "medium";
 
     renderPages();
 
@@ -253,6 +295,14 @@
       ltrButton.classList.add("active");
       rtlButton.classList.remove("active");
     });
+
+    fontDotButton.addEventListener("click", () => setFont("dot"));
+    fontSerifButton.addEventListener("click", () => setFont("serif"));
+    fontMaruButton.addEventListener("click", () => setFont("maru"));
+
+    sizeSmallButton.addEventListener("click", () => setSize("small"));
+    sizeMediumButton.addEventListener("click", () => setSize("medium"));
+    sizeLargeButton.addEventListener("click", () => setSize("large"));
 
     addPageButton.addEventListener("click", () => {
       saveCurrentText();
@@ -284,6 +334,8 @@
         title: title,
         type: "text",
         direction: direction,
+        novelFont: novelFont,
+        novelSize: novelSize,
         images: [],
         textPages: textPages,
         createdAt: new Date().toLocaleString("ja-JP")
@@ -295,6 +347,20 @@
       alert("文字本を本棚に追加しました♡");
       window.location.href = "bookshelf.html";
     });
+
+    function setFont(font) {
+      novelFont = font;
+      fontDotButton.classList.toggle("active", font === "dot");
+      fontSerifButton.classList.toggle("active", font === "serif");
+      fontMaruButton.classList.toggle("active", font === "maru");
+    }
+
+    function setSize(size) {
+      novelSize = size;
+      sizeSmallButton.classList.toggle("active", size === "small");
+      sizeMediumButton.classList.toggle("active", size === "medium");
+      sizeLargeButton.classList.toggle("active", size === "large");
+    }
 
     function renderPages() {
       pageList.innerHTML = "";
