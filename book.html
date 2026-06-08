@@ -168,11 +168,7 @@
     .novel-page {
       align-items: flex-start;
       justify-content: flex-start;
-      text-align: left;
       padding: 34px 36px;
-      line-height: 2;
-      font-size: 16px;
-      white-space: pre-wrap;
       color: #5f1747;
       overflow: hidden;
     }
@@ -180,9 +176,16 @@
     .novel-text {
       width: 100%;
       height: 100%;
-      overflow: hidden;
       position: relative;
       z-index: 1;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 2.1;
+      letter-spacing: 0.06em;
+      text-align: start;
+      white-space: pre-wrap;
+      overflow: hidden;
+      font-size: 16px;
     }
 
     .page-number {
@@ -268,7 +271,11 @@
 
       .novel-page {
         padding: 28px 24px;
+      }
+
+      .novel-text {
         font-size: 14px;
+        line-height: 2;
       }
     }
   </style>
@@ -280,7 +287,7 @@
   <main class="app">
     <header>
       <h1 id="bookTitle">Pink Flipbook</h1>
-      <p class="subtitle">ページの端をドラッグして、紙みたいにめくれます♡</p>
+      <p id="subtitle" class="subtitle">ページの端をドラッグして、紙みたいにめくれます♡</p>
     </header>
 
     <section class="panel">
@@ -297,8 +304,8 @@
         </div>
 
         <div class="controls">
-          <button id="prevButton" type="button">← 前のページ</button>
-          <button id="nextButton" type="button">次のページ →</button>
+          <button id="prevButton" type="button">← 前へ</button>
+          <button id="nextButton" type="button">次へ →</button>
         </div>
 
         <p id="pageInfo" class="hint"></p>
@@ -310,6 +317,7 @@
 
   <script>
     const bookTitle = document.getElementById("bookTitle");
+    const subtitle = document.getElementById("subtitle");
     const missingMessage = document.getElementById("missingMessage");
     const readerArea = document.getElementById("readerArea");
     const flipbookElement = document.getElementById("flipbook");
@@ -331,6 +339,11 @@
       readerArea.style.display = "none";
     } else {
       bookTitle.textContent = currentBook.title;
+
+      if (currentBook.type === "text") {
+        subtitle.textContent = "縦書きの小説本として読めます♡";
+      }
+
       createFlipbook();
     }
 
@@ -341,7 +354,9 @@
         <div class="page cover-page">
           <div class="page-content">
             <div class="cover-title">${escapeHtml(currentBook.title)}</div>
-            <div class="cover-sub">Pink Flipbook ♡</div>
+            <div class="cover-sub">
+              ${currentBook.type === "text" ? "Text Book ♡" : "Image Book ♡"}
+            </div>
           </div>
         </div>
       `);
