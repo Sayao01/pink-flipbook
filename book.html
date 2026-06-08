@@ -7,10 +7,7 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -60,10 +57,7 @@
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
-      text-shadow:
-        0 4px 0 #d95aa9,
-        0 0 18px #ff4fc3,
-        0 0 36px #fff;
+      text-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff4fc3, 0 0 36px #fff;
       word-break: break-word;
     }
 
@@ -80,15 +74,12 @@
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
-      box-shadow:
-        0 0 30px rgba(255, 105, 210, 0.45),
-        inset 0 0 18px rgba(255,255,255,0.65);
+      box-shadow: 0 0 30px rgba(255,105,210,0.45), inset 0 0 18px rgba(255,255,255,0.65);
       backdrop-filter: blur(12px);
       text-align: center;
     }
 
-    a.button,
-    button {
+    a.button, button {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
@@ -97,9 +88,7 @@
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
-      box-shadow:
-        0 6px 0 #d95aa9,
-        0 0 18px rgba(255, 141, 221, 0.9);
+      box-shadow: 0 6px 0 #d95aa9, 0 0 18px rgba(255,141,221,0.9);
       color: #7a1456;
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
@@ -135,8 +124,7 @@
       width: 100%;
       height: 100%;
       padding: 16px;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.96), rgba(255,246,253,1));
+      background: linear-gradient(90deg, rgba(255,255,255,0.96), rgba(255,246,253,1));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -149,8 +137,7 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 34%, rgba(122,20,86,0.08));
+      background: linear-gradient(90deg, rgba(255,255,255,0.18), transparent 34%, rgba(122,20,86,0.08));
       mix-blend-mode: multiply;
     }
 
@@ -178,14 +165,19 @@
       height: 100%;
       position: relative;
       z-index: 1;
+      white-space: pre-wrap;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 2;
+      text-align: left;
+    }
+
+    .vertical-text {
       writing-mode: vertical-rl;
       text-orientation: mixed;
       line-height: 2.1;
       letter-spacing: 0.06em;
       text-align: start;
-      white-space: pre-wrap;
-      overflow: hidden;
-      font-size: 16px;
     }
 
     .page-number {
@@ -214,9 +206,7 @@
     .cover-title {
       font-size: 34px;
       color: #fff;
-      text-shadow:
-        0 3px 0 #d95aa9,
-        0 0 18px #ff4fc3;
+      text-shadow: 0 3px 0 #d95aa9, 0 0 18px #ff4fc3;
       letter-spacing: 3px;
       line-height: 1.5;
       word-break: break-word;
@@ -236,9 +226,7 @@
       z-index: 1;
     }
 
-    .controls {
-      margin-top: 24px;
-    }
+    .controls { margin-top: 24px; }
 
     .hint {
       color: #9d2a72;
@@ -255,28 +243,11 @@
     }
 
     @media (max-width: 700px) {
-      .panel {
-        padding: 14px;
-      }
-
-      a.button,
-      button {
-        padding: 11px 18px;
-        font-size: 13px;
-      }
-
-      .cover-title {
-        font-size: 24px;
-      }
-
-      .novel-page {
-        padding: 28px 24px;
-      }
-
-      .novel-text {
-        font-size: 14px;
-        line-height: 2;
-      }
+      .panel { padding: 14px; }
+      a.button, button { padding: 11px 18px; font-size: 13px; }
+      .cover-title { font-size: 24px; }
+      .novel-page { padding: 28px 24px; }
+      .novel-text { font-size: 14px; line-height: 2; }
     }
   </style>
 </head>
@@ -291,7 +262,7 @@
     </header>
 
     <section class="panel">
-      <a class="button" href="index.html">← 本棚に戻る</a>
+      <a class="button" href="bookshelf.html">← 本棚に戻る</a>
 
       <div id="missingMessage" class="missing" style="display:none;">
         本が見つかりませんでした。<br />
@@ -340,35 +311,40 @@
     } else {
       bookTitle.textContent = currentBook.title;
 
-      if (currentBook.type === "text") {
-        subtitle.textContent = "縦書きの小説本として読めます♡";
-      }
+      const directionLabel = currentBook.direction === "rtl" ? "右開き" : "左開き";
+      const typeLabel = currentBook.type === "text" ? "文字本" : "画像本";
+      subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
 
       createFlipbook();
     }
 
     function createFlipbook() {
       const pages = [];
+      const isTextBook = currentBook.type === "text";
+      const isRtl = currentBook.direction === "rtl";
 
       pages.push(`
         <div class="page cover-page">
           <div class="page-content">
             <div class="cover-title">${escapeHtml(currentBook.title)}</div>
             <div class="cover-sub">
-              ${currentBook.type === "text" ? "Text Book ♡" : "Image Book ♡"}
+              ${isTextBook ? "Text Book ♡" : "Image Book ♡"}<br />
+              ${isRtl ? "Right Opening" : "Left Opening"}
             </div>
           </div>
         </div>
       `);
 
-      if (currentBook.type === "text") {
+      if (isTextBook) {
         const textPages = currentBook.textPages || [];
 
         textPages.forEach((text, index) => {
+          const verticalClass = isRtl ? "vertical-text" : "";
+
           pages.push(`
             <div class="page">
               <div class="page-content novel-page">
-                <div class="novel-text">${escapeHtml(text)}</div>
+                <div class="novel-text ${verticalClass}">${escapeHtml(text)}</div>
                 <div class="page-number">${index + 1}</div>
               </div>
             </div>
