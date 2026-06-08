@@ -46,6 +46,20 @@
       border: 2px solid white;
       box-shadow: 0 6px 0 #d95aa9, 0 0 18px #ff8ddd;
       font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      color: #7a1456;
+      transition: all 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(2px);
+      box-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff8ddd;
+    }
+
+    .button:active {
+      transform: translateY(6px);
+      box-shadow: 0 0 0 #d95aa9, 0 0 18px #ff8ddd;
     }
   </style>
 </head>
@@ -53,7 +67,7 @@
   <div class="card">
     <h1>Pink Flipbook ♡</h1>
     <p>画像を本みたいにめくれるアプリを作る予定です。</p>
-    <div class="button">Coming Soon</div>
+    <button class="button">Coming Soon</button>
   </div>
 </body>
 </html>
