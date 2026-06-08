@@ -109,10 +109,11 @@
       display: none;
     }
 
-    input[type="text"] {
-      width: min(480px, 90vw);
+    input[type="text"],
+    textarea {
+      width: min(520px, 90vw);
       padding: 15px 18px;
-      border-radius: 999px;
+      border-radius: 22px;
       border: 2px solid #fff;
       background: rgba(255,255,255,0.78);
       color: #7a1456;
@@ -123,8 +124,38 @@
       margin: 12px 0;
     }
 
-    input[type="text"]::placeholder {
-      color: #c55c9e;
+    input[type="text"] {
+      border-radius: 999px;
+    }
+
+    textarea {
+      min-height: 260px;
+      resize: vertical;
+      line-height: 1.8;
+    }
+
+    .mode-box {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .mode-card {
+      cursor: pointer;
+      width: 180px;
+      padding: 18px;
+      border-radius: 24px;
+      border: 3px solid #fff;
+      background: rgba(255,255,255,0.55);
+      box-shadow: 0 8px 0 #d95aa9, 0 0 18px rgba(255, 141, 221, 0.7);
+      font-weight: bold;
+    }
+
+    .mode-card.active {
+      background: linear-gradient(135deg, #fff, #ff9bdf);
+      transform: translateY(-3px);
     }
 
     .hint {
@@ -169,8 +200,8 @@
       font-weight: bold;
     }
 
-    .danger {
-      color: #b71970;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -181,7 +212,7 @@
   <main class="app">
     <header>
       <h1>Create Book</h1>
-      <p class="subtitle">画像を選んだ順番で、1冊の本にします♡</p>
+      <p class="subtitle">画像の本にするか、文字の本にするか選べます♡</p>
     </header>
 
     <section class="panel">
@@ -191,34 +222,84 @@
         <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
       </div>
 
-      <div>
-        <label class="upload-label" for="imageInput">画像を選ぶ</label>
-        <input id="imageInput" type="file" accept="image/*" multiple />
+      <p class="hint">まず、本のタイプを選んでください。</p>
+
+      <div class="mode-box">
+        <div id="imageModeButton" class="mode-card active">
+          画像で作る
+        </div>
+        <div id="textModeButton" class="mode-card">
+          文字で作る
+        </div>
       </div>
 
-      <p id="selectedInfo" class="hint">
-        まだ画像が選ばれていません。
-      </p>
+      <div id="imageArea">
+        <label class="upload-label" for="imageInput">画像を選ぶ</label>
+        <input id="imageInput" type="file" accept="image/*" multiple />
+
+        <p id="selectedInfo" class="hint">
+          まだ画像が選ばれていません。
+        </p>
+
+        <div id="previewGrid" class="preview-grid"></div>
+      </div>
+
+      <div id="textAreaBox" class="hidden">
+        <p class="hint">
+          本文を書いてください。<br />
+          ページを分けたいところに <b>---page---</b> と入れてください。
+        </p>
+
+        <textarea id="novelTextInput" placeholder="ここに本文を書く
+
+---page---
+
+ここから次のページ"></textarea>
+      </div>
 
       <button id="saveBookButton" type="button">本棚に追加する</button>
 
-      <p class="hint danger">
+      <p class="hint">
         今は試作品なので、このブラウザの中にだけ保存されます。<br />
         Googleログインとネット保存はあとで追加します。
       </p>
-
-      <div id="previewGrid" class="preview-grid"></div>
     </section>
   </main>
 
   <script>
     const bookTitleInput = document.getElementById("bookTitleInput");
+
+    const imageModeButton = document.getElementById("imageModeButton");
+    const textModeButton = document.getElementById("textModeButton");
+
+    const imageArea = document.getElementById("imageArea");
+    const textAreaBox = document.getElementById("textAreaBox");
+
     const imageInput = document.getElementById("imageInput");
     const selectedInfo = document.getElementById("selectedInfo");
-    const saveBookButton = document.getElementById("saveBookButton");
     const previewGrid = document.getElementById("previewGrid");
 
+    const novelTextInput = document.getElementById("novelTextInput");
+    const saveBookButton = document.getElementById("saveBookButton");
+
+    let mode = "image";
     let selectedImages = [];
+
+    imageModeButton.addEventListener("click", () => {
+      mode = "image";
+      imageModeButton.classList.add("active");
+      textModeButton.classList.remove("active");
+      imageArea.classList.remove("hidden");
+      textAreaBox.classList.add("hidden");
+    });
+
+    textModeButton.addEventListener("click", () => {
+      mode = "text";
+      textModeButton.classList.add("active");
+      imageModeButton.classList.remove("active");
+      textAreaBox.classList.remove("hidden");
+      imageArea.classList.add("hidden");
+    });
 
     imageInput.addEventListener("change", async (event) => {
       const files = Array.from(event.target.files);
@@ -244,19 +325,48 @@
         return;
       }
 
-      if (selectedImages.length === 0) {
-        alert("画像を選んでください。");
-        return;
-      }
-
       const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
 
-      const newBook = {
-        id: Date.now().toString(),
-        title: title,
-        images: selectedImages,
-        createdAt: new Date().toLocaleString("ja-JP")
-      };
+      let newBook;
+
+      if (mode === "image") {
+        if (selectedImages.length === 0) {
+          alert("画像を選んでください。");
+          return;
+        }
+
+        newBook = {
+          id: Date.now().toString(),
+          title: title,
+          type: "image",
+          images: selectedImages,
+          textPages: [],
+          createdAt: new Date().toLocaleString("ja-JP")
+        };
+      }
+
+      if (mode === "text") {
+        const text = novelTextInput.value.trim();
+
+        if (!text) {
+          alert("本文を書いてください。");
+          return;
+        }
+
+        const textPages = text
+          .split("---page---")
+          .map(page => page.trim())
+          .filter(page => page.length > 0);
+
+        newBook = {
+          id: Date.now().toString(),
+          title: title,
+          type: "text",
+          images: [],
+          textPages: textPages,
+          createdAt: new Date().toLocaleString("ja-JP")
+        };
+      }
 
       books.unshift(newBook);
       localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
