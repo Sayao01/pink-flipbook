@@ -105,6 +105,11 @@
       font-size: 15px;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     input[type="file"] {
       display: none;
     }
@@ -168,13 +173,9 @@
       margin-top: 26px;
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
-    .danger {
-      color: #b71970;
-    }
+    .danger { color: #b71970; }
 
     .preview-grid {
       display: grid;
@@ -433,11 +434,12 @@
 
           <label class="upload-label" for="imageInput">画像を追加する</label>
           <input id="imageInput" type="file" accept="image/*" multiple />
-<button id="compressImagesButton" type="button">画像をちょっと圧縮する</button>
-          
+
+          <button id="compressImagesButton" type="button">画像をちょっと圧縮する</button>
+
           <p class="hint">
             画像は「前へ」「後ろへ」で順番を変えられます。<br />
-            不要な画像は「消す」で削除できます。
+            圧縮した後は、必ず「変更を保存する」を押してください。
           </p>
 
           <div id="previewGrid" class="preview-grid"></div>
@@ -483,6 +485,7 @@
 
     const imageInput = document.getElementById("imageInput");
     const previewGrid = document.getElementById("previewGrid");
+    const compressImagesButton = document.getElementById("compressImagesButton");
 
     const pageList = document.getElementById("pageList");
     const addPageButton = document.getElementById("addPageButton");
@@ -596,19 +599,63 @@
     imageInput.addEventListener("change", async (event) => {
       const files = Array.from(event.target.files);
 
-      const addedImages = await Promise.all(
-        files.map((file) => {
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          });
-        })
+      if (files.length === 0) return;
+
+      try {
+        const addedImages = [];
+
+        for (const file of files) {
+          const compressedImage = await compressFileImage(file, 1400, 0.72);
+          addedImages.push(compressedImage);
+        }
+
+        images = images.concat(addedImages);
+        imageInput.value = "";
+        renderImages();
+      } catch (error) {
+        console.error(error);
+        alert("画像の読み込みに失敗しました。別の画像で試してください。");
+      }
+    });
+
+    compressImagesButton.addEventListener("click", async () => {
+      if (!currentBook || currentBook.type !== "image") return;
+
+      if (images.length === 0) {
+        alert("圧縮する画像がありません。");
+        return;
+      }
+
+      const ok = confirm(
+        "今ある画像を少し軽くします。\n" +
+        "画質は少しだけ落ちますが、保存しやすくなります。\n\n" +
+        "実行しますか？"
       );
 
-      images = images.concat(addedImages);
-      imageInput.value = "";
-      renderImages();
+      if (!ok) return;
+
+      compressImagesButton.disabled = true;
+      compressImagesButton.textContent = "圧縮中...";
+
+      try {
+        const compressedImages = [];
+
+        for (const image of images) {
+          const compressed = await compressDataUrlImage(image, 1200, 0.68);
+          compressedImages.push(compressed);
+        }
+
+        images = compressedImages;
+        renderImages();
+
+        alert("画像を少し軽くしました♡\n最後に「変更を保存する」を押してください。");
+      } catch (error) {
+        console.error(error);
+        alert("画像の圧縮に失敗しました。別の画像で試してください。");
+      }
+
+      compressImagesButton.disabled = false;
+      compressImagesButton.textContent = "画像をちょっと圧縮する";
     });
 
     addPageButton.addEventListener("click", () => {
@@ -676,11 +723,27 @@
         currentBook.novelSize = novelSize;
       }
 
-      books[bookIndex] = currentBook;
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+      saveButton.disabled = true;
+      saveButton.textContent = "保存中...";
 
-      alert("変更を保存しました♡");
-      window.location.href = "bookshelf.html";
+      try {
+        books[bookIndex] = currentBook;
+        localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+
+        alert("変更を保存しました♡");
+        window.location.href = "bookshelf.html";
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "保存できませんでした。\n" +
+          "画像がまだ大きいか、枚数が多すぎる可能性があります。\n" +
+          "画像を減らすか、「画像をちょっと圧縮する」を押してから保存してください。"
+        );
+
+        saveButton.disabled = false;
+        saveButton.textContent = "変更を保存する";
+      }
     });
 
     function renderImages() {
@@ -899,6 +962,53 @@
       if (size === "small") return "13px";
       if (size === "large") return "16px";
       return "14.5px";
+    }
+
+    function compressFileImage(file, maxSize = 1400, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          compressDataUrlImage(reader.result, maxSize, quality)
+            .then(resolve)
+            .catch(reject);
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function compressDataUrlImage(dataUrl, maxSize = 1200, quality = 0.68) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxSize) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else if (height >= width && height > maxSize) {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(compressedDataUrl);
+        };
+
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
     }
 
     function escapeHtml(text) {
