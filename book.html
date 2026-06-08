@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Read Book - Pink Flipbook</title>
+  <title>Read Book</title>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Kosugi+Maru&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -200,12 +198,27 @@
       z-index: 1;
       white-space: pre-wrap;
       overflow: hidden;
-      font-size: 16px;
       line-height: 2;
       text-align: left;
       user-select: none;
       -webkit-user-select: none;
     }
+
+    .font-dot {
+      font-family: "DotGothic16", sans-serif;
+    }
+
+    .font-serif {
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif;
+    }
+
+    .font-maru {
+      font-family: "Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif;
+    }
+
+    .size-small { font-size: 14px; }
+    .size-medium { font-size: 16px; }
+    .size-large { font-size: 19px; }
 
     .vertical-text {
       writing-mode: vertical-rl;
@@ -309,13 +322,12 @@
       }
 
       .novel-page {
-        padding: 28px 24px;
+        padding: 26px 22px;
       }
 
-      .novel-text {
-        font-size: 14px;
-        line-height: 2;
-      }
+      .size-small { font-size: 12px; }
+      .size-medium { font-size: 14px; }
+      .size-large { font-size: 16px; }
     }
   </style>
 </head>
@@ -325,7 +337,7 @@
 
   <main class="app">
     <header>
-      <h1 id="bookTitle">Pink Flipbook</h1>
+      <h1 id="bookTitle">Book</h1>
       <p id="subtitle" class="subtitle">
         ページの端を軽くドラッグしてめくれます♡
       </p>
@@ -380,10 +392,12 @@
 
     if (!currentBook) {
       bookTitle.textContent = "Not Found";
+      document.title = "Not Found";
       missingMessage.style.display = "block";
       readerArea.style.display = "none";
     } else {
       bookTitle.textContent = currentBook.title;
+      document.title = currentBook.title;
       createFlipbook();
     }
 
@@ -403,7 +417,7 @@
           <div class="page-content">
             <div class="cover-title">${escapeHtml(currentBook.title)}</div>
             <div class="cover-sub">
-              ${isTextBook ? "Text Book ♡" : "Image Book ♡"}<br />
+              ${typeLabel}<br />
               ${directionLabel}
             </div>
           </div>
@@ -412,6 +426,8 @@
 
       if (isTextBook) {
         const textPages = currentBook.textPages || [];
+        const fontClass = getFontClass(currentBook.novelFont);
+        const sizeClass = getSizeClass(currentBook.novelSize);
 
         textPages.forEach((text, index) => {
           const verticalClass = isRightOpening ? "vertical-text" : "";
@@ -419,7 +435,9 @@
           pages.push(`
             <div class="page">
               <div class="page-content novel-page">
-                <div class="novel-text ${verticalClass}">${escapeHtml(text)}</div>
+                <div class="novel-text ${fontClass} ${sizeClass} ${verticalClass}">
+                  ${escapeHtml(text)}
+                </div>
                 <div class="page-number">${index + 1}</div>
               </div>
             </div>
@@ -450,12 +468,6 @@
         `);
       }
 
-      /*
-        右開きの場合：
-        ページ順を逆にして、最後のページから表示する。
-        これで「次のページ」が flipPrev になり、
-        左から右にドラッグする動きになる。
-      */
       if (isRightOpening) {
         pages = pages.reverse();
       }
@@ -475,17 +487,8 @@
         maxHeight: isSmallScreen ? 470 : 720,
 
         showCover: true,
-
-        /*
-          見開きにしたいので false。
-          スマホでも基本は見開き優先。
-        */
         usePortrait: false,
 
-        /*
-          ここが大事。
-          数字を小さくすると、軽いドラッグでもめくれやすくなる。
-        */
         swipeDistance: 8,
 
         mobileScrollSupport: false,
@@ -562,6 +565,18 @@
         prevButton.disabled = physicalPage === 0;
         nextButton.disabled = physicalPage >= total - 1;
       }
+    }
+
+    function getFontClass(font) {
+      if (font === "serif") return "font-serif";
+      if (font === "maru") return "font-maru";
+      return "font-dot";
+    }
+
+    function getSizeClass(size) {
+      if (size === "small") return "size-small";
+      if (size === "large") return "size-large";
+      return "size-medium";
     }
 
     function escapeHtml(text) {
