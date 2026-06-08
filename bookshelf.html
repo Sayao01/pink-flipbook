@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bookshelf - Pink Flipbook</title>
+  <title>Bookshelf</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
@@ -205,7 +205,7 @@
       .panel { padding: 16px; border-radius: 26px; margin: 16px auto; }
       a.button, button { width: 100%; text-align: center; padding: 12px 16px; font-size: 13px; }
       .bookshelf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .book-card { min-height: 200px; padding: 12px; border-radius: 20px; box-shadow: 0 8px 0 #d95aa9, 0 0 18px rgba(255,105,210,0.5); }
+      .book-card { min-height: 200px; padding: 12px; border-radius: 20px; }
       .book-cover { height: 105px; border-radius: 14px; }
       .book-title { font-size: 14px; }
       .book-meta { font-size: 11px; }
@@ -223,7 +223,7 @@
 
   <main class="app">
     <header>
-      <h1>Pink Flipbook</h1>
+      <h1 id="mainTitle">MY BOOKSHELF</h1>
       <p class="subtitle">画像本・文字本をストックできるY2K本棚</p>
     </header>
 
@@ -248,6 +248,7 @@
   </main>
 
   <script>
+    const mainTitle = document.getElementById("mainTitle");
     const bookshelfTitle = document.getElementById("bookshelfTitle");
     const bookshelf = document.getElementById("bookshelf");
     const emptyShelf = document.getElementById("emptyShelf");
@@ -255,15 +256,13 @@
     const renameShelfButton = document.getElementById("renameShelfButton");
 
     let books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
-    const shelfName = localStorage.getItem("pinkFlipbookShelfName");
+    let shelfName = localStorage.getItem("pinkFlipbookShelfName") || "MY BOOKSHELF";
 
-    bookshelfTitle.textContent = shelfName || "MY BOOKSHELF";
-
+    setShelfTitle(shelfName);
     renderBookshelf();
 
     renameShelfButton.addEventListener("click", () => {
-      const currentName = localStorage.getItem("pinkFlipbookShelfName") || "";
-      const newName = prompt("新しい本棚名を入れてください。", currentName);
+      const newName = prompt("新しい本棚名を入れてください。", shelfName);
 
       if (newName === null) return;
 
@@ -273,8 +272,9 @@
         return;
       }
 
-      localStorage.setItem("pinkFlipbookShelfName", trimmed);
-      bookshelfTitle.textContent = trimmed;
+      shelfName = trimmed;
+      localStorage.setItem("pinkFlipbookShelfName", shelfName);
+      setShelfTitle(shelfName);
     });
 
     clearAllButton.addEventListener("click", () => {
@@ -285,6 +285,12 @@
       localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
       renderBookshelf();
     });
+
+    function setShelfTitle(name) {
+      mainTitle.textContent = name;
+      bookshelfTitle.textContent = name;
+      document.title = name;
+    }
 
     function renderBookshelf() {
       bookshelf.innerHTML = "";
@@ -313,11 +319,19 @@
         const typeLabel = isTextBook ? "文字本" : "画像本";
         const directionLabel = book.direction === "rtl" ? "右開き" : "左開き";
 
+        let novelInfo = "";
+        if (isTextBook) {
+          const fontLabel = getFontLabel(book.novelFont);
+          const sizeLabel = getSizeLabel(book.novelSize);
+          novelInfo = `<div class="book-meta">${fontLabel} / ${sizeLabel}</div>`;
+        }
+
         card.innerHTML = `
           <div>
             <div class="book-cover">${coverImage}</div>
             <div class="book-title">${escapeHtml(book.title)}</div>
             <div class="book-meta">${typeLabel} / ${directionLabel}</div>
+            ${novelInfo}
             <div class="book-meta">${pageCount} pages</div>
             <div class="book-meta">${book.createdAt}</div>
           </div>
@@ -342,6 +356,18 @@
           renderBookshelf();
         });
       });
+    }
+
+    function getFontLabel(font) {
+      if (font === "serif") return "明朝";
+      if (font === "maru") return "丸ゴ";
+      return "ドット";
+    }
+
+    function getSizeLabel(size) {
+      if (size === "small") return "小";
+      if (size === "large") return "大";
+      return "中";
     }
 
     function escapeHtml(text) {
