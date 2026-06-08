@@ -110,13 +110,20 @@
       cursor: not-allowed;
     }
 
-    .book-view {
+    .book-stage {
+      position: relative;
       width: min(920px, 95vw);
       margin: 20px auto 0;
+      perspective: 2200px;
+      filter: drop-shadow(0 24px 30px rgba(122,20,86,0.35));
+    }
+
+    .book-view {
+      width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      perspective: 1600px;
-      filter: drop-shadow(0 24px 30px rgba(122,20,86,0.35));
+      position: relative;
+      transform-style: preserve-3d;
     }
 
     .page {
@@ -129,18 +136,33 @@
       padding: 18px;
       position: relative;
       overflow: hidden;
+      backface-visibility: hidden;
     }
 
     .page.left {
       border-radius: 28px 0 0 28px;
       border-right: 1px solid #efb3dc;
-      box-shadow: inset -16px 0 22px rgba(122, 20, 86, 0.12);
+      box-shadow:
+        inset -18px 0 24px rgba(122, 20, 86, 0.16),
+        inset 0 0 24px rgba(255,255,255,0.8);
     }
 
     .page.right {
       border-radius: 0 28px 28px 0;
       border-left: 1px solid #efb3dc;
-      box-shadow: inset 16px 0 22px rgba(122, 20, 86, 0.12);
+      box-shadow:
+        inset 18px 0 24px rgba(122, 20, 86, 0.14),
+        inset 0 0 24px rgba(255,255,255,0.8);
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 26%, rgba(122,20,86,0.06));
+      mix-blend-mode: multiply;
     }
 
     .page img {
@@ -150,6 +172,8 @@
       border-radius: 18px;
       box-shadow: 0 10px 24px rgba(122, 20, 86, 0.22);
       background: #fff;
+      position: relative;
+      z-index: 1;
     }
 
     .page-number {
@@ -158,6 +182,7 @@
       font-size: 13px;
       color: #b13a86;
       font-weight: bold;
+      z-index: 2;
     }
 
     .empty-page {
@@ -165,6 +190,82 @@
       font-weight: bold;
       text-align: center;
       line-height: 1.8;
+      z-index: 1;
+    }
+
+    .flipper {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      min-height: 560px;
+      background: #fff6fd;
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      overflow: hidden;
+      z-index: 10;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      box-shadow: 0 20px 36px rgba(122,20,86,0.28);
+      pointer-events: none;
+    }
+
+    .flipper img {
+      max-width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(122, 20, 86, 0.22);
+      background: #fff;
+    }
+
+    .flipper.next {
+      left: 50%;
+      border-radius: 0 28px 28px 0;
+      transform-origin: left center;
+      animation: flipNext 0.75s ease-in-out forwards;
+    }
+
+    .flipper.prev {
+      left: 0;
+      border-radius: 28px 0 0 28px;
+      transform-origin: right center;
+      animation: flipPrev 0.75s ease-in-out forwards;
+    }
+
+    .flipper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.25), transparent 35%, rgba(122,20,86,0.18));
+      pointer-events: none;
+    }
+
+    @keyframes flipNext {
+      0% {
+        transform: rotateY(0deg);
+      }
+      45% {
+        box-shadow: -18px 18px 32px rgba(122,20,86,0.32);
+      }
+      100% {
+        transform: rotateY(-180deg);
+      }
+    }
+
+    @keyframes flipPrev {
+      0% {
+        transform: rotateY(0deg);
+      }
+      45% {
+        box-shadow: 18px 18px 32px rgba(122,20,86,0.32);
+      }
+      100% {
+        transform: rotateY(180deg);
+      }
     }
 
     .controls {
@@ -176,36 +277,6 @@
       font-weight: bold;
       line-height: 1.8;
       font-size: 14px;
-    }
-
-    .turning-right {
-      animation: turnRight 0.45s ease;
-    }
-
-    .turning-left {
-      animation: turnLeft 0.45s ease;
-    }
-
-    @keyframes turnRight {
-      from {
-        transform: rotateY(0deg);
-        opacity: 0.75;
-      }
-      to {
-        transform: rotateY(-8deg);
-        opacity: 1;
-      }
-    }
-
-    @keyframes turnLeft {
-      from {
-        transform: rotateY(0deg);
-        opacity: 0.75;
-      }
-      to {
-        transform: rotateY(8deg);
-        opacity: 1;
-      }
     }
 
     .missing {
@@ -232,6 +303,22 @@
         min-height: 480px;
       }
 
+      .book-stage {
+        perspective: 1600px;
+      }
+
+      .flipper {
+        width: 100%;
+        left: 0 !important;
+        min-height: 480px;
+        border-radius: 28px;
+        transform-origin: left center;
+      }
+
+      .flipper.prev {
+        transform-origin: right center;
+      }
+
       .panel {
         padding: 18px;
       }
@@ -245,7 +332,7 @@
   <main class="app">
     <header>
       <h1 id="bookTitle">Pink Flipbook</h1>
-      <p class="subtitle">ページをめくって読めます♡</p>
+      <p class="subtitle">ページをぺらっとめくって読めます♡</p>
     </header>
 
     <section class="panel">
@@ -257,12 +344,14 @@
       </div>
 
       <div id="readerArea">
-        <div id="bookView" class="book-view">
-          <div class="page left" id="leftPage">
-            <div class="empty-page">左ページ</div>
-          </div>
-          <div class="page right" id="rightPage">
-            <div class="empty-page">右ページ</div>
+        <div class="book-stage" id="bookStage">
+          <div id="bookView" class="book-view">
+            <div class="page left" id="leftPage">
+              <div class="empty-page">左ページ</div>
+            </div>
+            <div class="page right" id="rightPage">
+              <div class="empty-page">右ページ</div>
+            </div>
           </div>
         </div>
 
@@ -281,7 +370,7 @@
     const missingMessage = document.getElementById("missingMessage");
     const readerArea = document.getElementById("readerArea");
 
-    const bookView = document.getElementById("bookView");
+    const bookStage = document.getElementById("bookStage");
     const leftPage = document.getElementById("leftPage");
     const rightPage = document.getElementById("rightPage");
     const prevButton = document.getElementById("prevButton");
@@ -295,6 +384,7 @@
     const currentBook = books.find((book) => book.id === bookId);
 
     let currentSpread = 0;
+    let isTurning = false;
 
     if (!currentBook) {
       bookTitle.textContent = "Not Found";
@@ -306,24 +396,50 @@
     }
 
     prevButton.addEventListener("click", () => {
-      if (currentSpread > 0) {
-        currentSpread--;
-        animateBook("turning-left");
-        renderCurrentBook();
-      }
+      if (!currentBook || isTurning || currentSpread === 0) return;
+
+      turnPage("prev");
     });
 
     nextButton.addEventListener("click", () => {
-      if (!currentBook) return;
+      if (!currentBook || isTurning) return;
 
       const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
+      if (currentSpread >= maxSpread) return;
 
-      if (currentSpread < maxSpread) {
-        currentSpread++;
-        animateBook("turning-right");
-        renderCurrentBook();
-      }
+      turnPage("next");
     });
+
+    function turnPage(direction) {
+      isTurning = true;
+      updateButtons();
+
+      const flip = document.createElement("div");
+      flip.className = "flipper " + direction;
+
+      if (direction === "next") {
+        const rightIndex = currentSpread * 2 + 1;
+        flip.innerHTML = createPageContent(currentBook.images[rightIndex], rightIndex);
+      } else {
+        const leftIndex = currentSpread * 2;
+        flip.innerHTML = createPageContent(currentBook.images[leftIndex], leftIndex);
+      }
+
+      bookStage.appendChild(flip);
+
+      setTimeout(() => {
+        if (direction === "next") {
+          currentSpread++;
+        } else {
+          currentSpread--;
+        }
+
+        renderCurrentBook();
+        flip.remove();
+        isTurning = false;
+        updateButtons();
+      }, 760);
+    }
 
     function renderCurrentBook() {
       if (!currentBook) return;
@@ -335,11 +451,18 @@
       rightPage.innerHTML = createPageContent(currentBook.images[rightIndex], rightIndex);
 
       const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
-
-      prevButton.disabled = currentSpread === 0;
-      nextButton.disabled = currentSpread === maxSpread;
-
       pageInfo.textContent = `${currentSpread + 1} / ${maxSpread + 1} 見開き`;
+
+      updateButtons();
+    }
+
+    function updateButtons() {
+      if (!currentBook) return;
+
+      const maxSpread = Math.ceil(currentBook.images.length / 2) - 1;
+
+      prevButton.disabled = isTurning || currentSpread === 0;
+      nextButton.disabled = isTurning || currentSpread === maxSpread;
     }
 
     function createPageContent(src, index) {
@@ -351,12 +474,6 @@
         <img src="${src}" alt="page ${index + 1}" />
         <div class="page-number">${index + 1}</div>
       `;
-    }
-
-    function animateBook(className) {
-      bookView.classList.remove("turning-right", "turning-left");
-      void bookView.offsetWidth;
-      bookView.classList.add(className);
     }
   </script>
 </body>
