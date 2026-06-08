@@ -120,7 +120,8 @@
       font-size: 15px;
       outline: none;
       box-shadow: inset 0 0 12px rgba(255,141,221,0.5);
-      margin: 12px 0;
+      margin: 10px 0;
+      text-align: center;
     }
 
     .choice-box {
@@ -138,7 +139,9 @@
       border-radius: 22px;
       border: 3px solid #fff;
       background: rgba(255,255,255,0.55);
-      box-shadow: 0 7px 0 #d95aa9, 0 0 16px rgba(255,141,221,0.7);
+      box-shadow:
+        0 7px 0 #d95aa9,
+        0 0 16px rgba(255,141,221,0.7);
       font-weight: bold;
       text-align: center;
     }
@@ -165,28 +168,35 @@
       margin-top: 26px;
     }
 
+    .hidden {
+      display: none;
+    }
+
+    .danger {
+      color: #b71970;
+    }
+
     .preview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 16px;
       margin-top: 22px;
     }
 
     .preview {
-      min-height: 175px;
-      border-radius: 18px;
+      min-height: 225px;
+      border-radius: 20px;
       border: 2px solid #fff;
       background: rgba(255,255,255,0.55);
       overflow: hidden;
-      position: relative;
-      box-shadow: 0 8px 18px rgba(122, 20, 86, 0.18);
+      box-shadow: 0 8px 18px rgba(122,20,86,0.18);
       padding-bottom: 12px;
       text-align: center;
     }
 
     .preview img {
       width: 100%;
-      height: 120px;
+      height: 140px;
       object-fit: cover;
       display: block;
     }
@@ -194,7 +204,7 @@
     .preview-number {
       display: inline-block;
       margin-top: 8px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.82);
       color: #b13a86;
       border-radius: 999px;
       padding: 2px 8px;
@@ -312,19 +322,11 @@
     }
 
     .small-button {
-      padding: 9px 14px;
-      font-size: 13px;
+      padding: 8px 11px;
+      font-size: 12px;
       box-shadow:
         0 4px 0 #d95aa9,
         0 0 12px rgba(255,141,221,0.9);
-    }
-
-    .danger {
-      color: #b71970;
-    }
-
-    .hidden {
-      display: none;
     }
 
     .bottom-actions {
@@ -363,6 +365,14 @@
       .preview-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .preview img {
+        height: 120px;
+      }
+
+      .small-button {
+        width: auto;
+      }
     }
   </style>
 </head>
@@ -389,11 +399,15 @@
           <input id="bookTitleInput" type="text" placeholder="本のタイトル" />
         </div>
 
+        <div>
+          <input id="bookDateInput" type="text" placeholder="日付 例：2026.6.9 / 2026年6月9日" />
+        </div>
+
         <p class="hint">開き方を選んでください。</p>
 
         <div class="choice-box">
-          <div id="rtlButton" class="choice-card">右開き<br />縦書き</div>
-          <div id="ltrButton" class="choice-card">左開き<br />横書き</div>
+          <div id="rtlButton" class="choice-card">右開き</div>
+          <div id="ltrButton" class="choice-card">左開き</div>
         </div>
 
         <div id="textOptions" class="hidden">
@@ -421,8 +435,8 @@
           <input id="imageInput" type="file" accept="image/*" multiple />
 
           <p class="hint">
-            追加した画像は最後のページに入ります。<br />
-            不要なページは「消す」で削除できます。
+            画像は「前へ」「後ろへ」で順番を変えられます。<br />
+            不要な画像は「消す」で削除できます。
           </p>
 
           <div id="previewGrid" class="preview-grid"></div>
@@ -457,6 +471,7 @@
     const editorArea = document.getElementById("editorArea");
 
     const bookTitleInput = document.getElementById("bookTitleInput");
+    const bookDateInput = document.getElementById("bookDateInput");
 
     const rtlButton = document.getElementById("rtlButton");
     const ltrButton = document.getElementById("ltrButton");
@@ -486,7 +501,7 @@
     let bookIndex = books.findIndex((book) => book.id === bookId);
     let currentBook = books[bookIndex];
 
-    let direction = "ltr";
+    let direction = "rtl";
     let novelFont = "serif";
     let novelSize = "medium";
     let images = [];
@@ -503,7 +518,9 @@
       document.title = "Edit - " + currentBook.title;
 
       bookTitleInput.value = currentBook.title || "";
-      direction = currentBook.direction || "ltr";
+      bookDateInput.value = currentBook.bookDate || currentBook.createdAt || "";
+
+      direction = currentBook.direction || "rtl";
 
       images = currentBook.images ? [...currentBook.images] : [];
       textPages = normalizeTextPages(currentBook.textPages || []);
@@ -601,13 +618,20 @@
 
     saveButton.addEventListener("click", () => {
       const title = bookTitleInput.value.trim();
+      const bookDate = bookDateInput.value.trim();
 
       if (!title) {
         alert("本のタイトルを入れてください。");
         return;
       }
 
+      if (!bookDate) {
+        alert("日付を入れてください。");
+        return;
+      }
+
       currentBook.title = title;
+      currentBook.bookDate = bookDate;
       currentBook.direction = direction;
       currentBook.updatedAt = new Date().toLocaleString("ja-JP");
 
@@ -661,6 +685,11 @@
     function renderImages() {
       previewGrid.innerHTML = "";
 
+      if (images.length === 0) {
+        previewGrid.innerHTML = '<p class="hint">画像がありません。</p>';
+        return;
+      }
+
       images.forEach((src, index) => {
         const item = document.createElement("div");
         item.className = "preview";
@@ -668,7 +697,11 @@
         item.innerHTML = `
           <img src="${src}" alt="page ${index + 1}" />
           <div class="preview-number">PAGE ${index + 1}</div>
-          <button class="small-button" data-delete-image="${index}" type="button">消す</button>
+          <div>
+            <button class="small-button" data-up="${index}" type="button">前へ</button>
+            <button class="small-button" data-down="${index}" type="button">後ろへ</button>
+            <button class="small-button" data-delete-image="${index}" type="button">消す</button>
+          </div>
         `;
 
         previewGrid.appendChild(item);
@@ -677,7 +710,6 @@
       document.querySelectorAll("[data-delete-image]").forEach((button) => {
         button.addEventListener("click", () => {
           const index = Number(button.getAttribute("data-delete-image"));
-
           const ok = confirm("この画像ページを消しますか？");
           if (!ok) return;
 
@@ -685,6 +717,28 @@
           renderImages();
         });
       });
+
+      document.querySelectorAll("[data-up]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.getAttribute("data-up"));
+          moveImage(index, index - 1);
+        });
+      });
+
+      document.querySelectorAll("[data-down]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.getAttribute("data-down"));
+          moveImage(index, index + 1);
+        });
+      });
+    }
+
+    function moveImage(from, to) {
+      if (to < 0 || to >= images.length) return;
+
+      const item = images.splice(from, 1)[0];
+      images.splice(to, 0, item);
+      renderImages();
     }
 
     function renderTextPages() {
