@@ -7,7 +7,10 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -35,8 +38,12 @@
     }
 
     @keyframes glitter {
-      from { transform: translateY(0); }
-      to { transform: translateY(-80px); }
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-80px);
+      }
     }
 
     .app {
@@ -57,7 +64,10 @@
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
-      text-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff4fc3, 0 0 36px #fff;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
       word-break: break-word;
     }
 
@@ -74,12 +84,15 @@
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
-      box-shadow: 0 0 30px rgba(255,105,210,0.45), inset 0 0 18px rgba(255,255,255,0.65);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
       backdrop-filter: blur(12px);
       text-align: center;
     }
 
-    a.button, button {
+    a.button,
+    button {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
@@ -88,7 +101,9 @@
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
-      box-shadow: 0 6px 0 #d95aa9, 0 0 18px rgba(255,141,221,0.9);
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
       color: #7a1456;
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
@@ -124,7 +139,8 @@
       width: 100%;
       height: 100%;
       padding: 16px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.96), rgba(255,246,253,1));
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.96), rgba(255,246,253,1));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -137,7 +153,8 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(90deg, rgba(255,255,255,0.18), transparent 34%, rgba(122,20,86,0.08));
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 34%, rgba(122,20,86,0.08));
       mix-blend-mode: multiply;
     }
 
@@ -206,7 +223,9 @@
     .cover-title {
       font-size: 34px;
       color: #fff;
-      text-shadow: 0 3px 0 #d95aa9, 0 0 18px #ff4fc3;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 18px #ff4fc3;
       letter-spacing: 3px;
       line-height: 1.5;
       word-break: break-word;
@@ -216,6 +235,7 @@
       margin-top: 18px;
       color: #8c1d63;
       font-weight: bold;
+      line-height: 1.8;
     }
 
     .blank {
@@ -226,7 +246,9 @@
       z-index: 1;
     }
 
-    .controls { margin-top: 24px; }
+    .controls {
+      margin-top: 24px;
+    }
 
     .hint {
       color: #9d2a72;
@@ -243,11 +265,35 @@
     }
 
     @media (max-width: 700px) {
-      .panel { padding: 14px; }
-      a.button, button { padding: 11px 18px; font-size: 13px; }
-      .cover-title { font-size: 24px; }
-      .novel-page { padding: 28px 24px; }
-      .novel-text { font-size: 14px; line-height: 2; }
+      .app {
+        width: 96vw;
+        padding: 20px 0 36px;
+      }
+
+      .panel {
+        padding: 14px;
+        border-radius: 26px;
+      }
+
+      a.button,
+      button {
+        width: 100%;
+        padding: 11px 18px;
+        font-size: 13px;
+      }
+
+      .cover-title {
+        font-size: 24px;
+      }
+
+      .novel-page {
+        padding: 28px 24px;
+      }
+
+      .novel-text {
+        font-size: 14px;
+        line-height: 2;
+      }
     }
   </style>
 </head>
@@ -258,7 +304,9 @@
   <main class="app">
     <header>
       <h1 id="bookTitle">Pink Flipbook</h1>
-      <p id="subtitle" class="subtitle">ページの端をドラッグして、紙みたいにめくれます♡</p>
+      <p id="subtitle" class="subtitle">
+        ページの端をドラッグして、紙みたいにめくれます♡
+      </p>
     </header>
 
     <section class="panel">
@@ -275,8 +323,8 @@
         </div>
 
         <div class="controls">
-          <button id="prevButton" type="button">← 前へ</button>
-          <button id="nextButton" type="button">次へ →</button>
+          <button id="nextButton" type="button">次のページ</button>
+          <button id="prevButton" type="button">前のページ</button>
         </div>
 
         <p id="pageInfo" class="hint"></p>
@@ -310,18 +358,18 @@
       readerArea.style.display = "none";
     } else {
       bookTitle.textContent = currentBook.title;
-
-      const directionLabel = currentBook.direction === "rtl" ? "右開き" : "左開き";
-      const typeLabel = currentBook.type === "text" ? "文字本" : "画像本";
-      subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
-
       createFlipbook();
     }
 
     function createFlipbook() {
-      const pages = [];
       const isTextBook = currentBook.type === "text";
-      const isRtl = currentBook.direction === "rtl";
+      const isRightOpening = currentBook.direction === "rtl";
+      const directionLabel = isRightOpening ? "右開き" : "左開き";
+      const typeLabel = isTextBook ? "文字本" : "画像本";
+
+      subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
+
+      const pages = [];
 
       pages.push(`
         <div class="page cover-page">
@@ -329,7 +377,7 @@
             <div class="cover-title">${escapeHtml(currentBook.title)}</div>
             <div class="cover-sub">
               ${isTextBook ? "Text Book ♡" : "Image Book ♡"}<br />
-              ${isRtl ? "Right Opening" : "Left Opening"}
+              ${directionLabel}
             </div>
           </div>
         </div>
@@ -339,7 +387,7 @@
         const textPages = currentBook.textPages || [];
 
         textPages.forEach((text, index) => {
-          const verticalClass = isRtl ? "vertical-text" : "";
+          const verticalClass = isRightOpening ? "vertical-text" : "";
 
           pages.push(`
             <div class="page">
@@ -385,10 +433,12 @@
         maxWidth: 520,
         minHeight: 430,
         maxHeight: 720,
+
         showCover: true,
         usePortrait: true,
         mobileScrollSupport: false,
         useMouseEvents: true,
+
         drawShadow: true,
         maxShadowOpacity: 0.8,
         flippingTime: 1100,
@@ -405,15 +455,15 @@
       updateInfo();
     }
 
-    prevButton.addEventListener("click", () => {
-      if (!pageFlip) return;
-      pageFlip.flipPrev();
-      setTimeout(updateInfo, 400);
-    });
-
     nextButton.addEventListener("click", () => {
       if (!pageFlip) return;
       pageFlip.flipNext();
+      setTimeout(updateInfo, 400);
+    });
+
+    prevButton.addEventListener("click", () => {
+      if (!pageFlip) return;
+      pageFlip.flipPrev();
       setTimeout(updateInfo, 400);
     });
 
