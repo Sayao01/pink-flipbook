@@ -21,6 +21,7 @@
         radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
         linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
       color: #7a1456;
+      overflow-x: hidden;
     }
 
     .sparkle {
@@ -55,7 +56,7 @@
     }
 
     h1 {
-      font-size: clamp(38px, 8vw, 82px);
+      font-size: clamp(36px, 8vw, 82px);
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
@@ -63,12 +64,14 @@
         0 4px 0 #d95aa9,
         0 0 18px #ff4fc3,
         0 0 36px #fff;
+      word-break: break-word;
     }
 
     .subtitle {
       margin-top: 12px;
       color: #8c1d63;
       font-weight: bold;
+      line-height: 1.7;
     }
 
     .panel {
@@ -106,15 +109,25 @@
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
       font-size: 15px;
+      display: inline-block;
     }
 
     .bookshelf-title {
-      font-size: 24px;
+      font-size: 28px;
       color: #fff;
       text-shadow: 0 3px 0 #d95aa9, 0 0 18px #ff4fc3;
-      margin: 8px 0 18px;
+      margin: 8px 0 8px;
       text-align: center;
       letter-spacing: 3px;
+      word-break: break-word;
+    }
+
+    .bookshelf-sub {
+      text-align: center;
+      color: #9d2a72;
+      font-weight: bold;
+      margin-bottom: 18px;
+      line-height: 1.7;
     }
 
     .bookshelf {
@@ -150,6 +163,8 @@
       justify-content: center;
       overflow: hidden;
       margin-bottom: 12px;
+      color: #d95aa9;
+      font-size: 34px;
     }
 
     .book-cover img {
@@ -195,25 +210,187 @@
       font-weight: bold;
       line-height: 1.9;
     }
+
+    .welcome {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 30%),
+        rgba(255, 170, 225, 0.78);
+      backdrop-filter: blur(10px);
+    }
+
+    .welcome.show {
+      display: flex;
+    }
+
+    .welcome-card {
+      width: min(560px, 94vw);
+      padding: 32px;
+      border-radius: 32px;
+      border: 3px solid #fff;
+      background: rgba(255,255,255,0.62);
+      box-shadow:
+        0 14px 0 #d95aa9,
+        0 0 34px rgba(255, 105, 210, 0.75);
+      text-align: center;
+    }
+
+    .welcome-title {
+      font-size: clamp(28px, 7vw, 54px);
+      color: #fff;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3;
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+    }
+
+    .welcome-text {
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    input[type="text"] {
+      width: min(420px, 90vw);
+      padding: 15px 18px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.82);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-size: 15px;
+      outline: none;
+      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.5);
+      margin: 12px 0;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        width: 94vw;
+        padding: 22px 0 36px;
+      }
+
+      header {
+        padding: 16px 8px;
+      }
+
+      h1 {
+        font-size: clamp(34px, 12vw, 56px);
+        letter-spacing: 3px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+
+      .panel {
+        padding: 16px;
+        border-radius: 26px;
+        margin: 16px auto;
+      }
+
+      .top-actions {
+        gap: 8px;
+      }
+
+      a.button,
+      button {
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+
+      .bookshelf {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .book-card {
+        min-height: 200px;
+        padding: 12px;
+        border-radius: 20px;
+        box-shadow:
+          0 8px 0 #d95aa9,
+          0 0 18px rgba(255, 105, 210, 0.5);
+      }
+
+      .book-cover {
+        height: 105px;
+        border-radius: 14px;
+      }
+
+      .book-title {
+        font-size: 14px;
+      }
+
+      .book-meta {
+        font-size: 11px;
+      }
+
+      .small-button {
+        width: auto;
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+
+      .welcome-card {
+        padding: 24px 18px;
+        border-radius: 26px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .bookshelf {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="sparkle"></div>
 
+  <div id="welcome" class="welcome">
+    <div class="welcome-card">
+      <div class="welcome-title">Welcome ♡</div>
+      <p class="welcome-text">
+        まず、あなたの本棚に名前をつけてください。<br />
+        あとから変更できます。
+      </p>
+
+      <input id="shelfNameInput" type="text" placeholder="例：ななの夢ログ本棚" />
+
+      <div>
+        <button id="saveShelfNameButton" type="button">本棚を作る</button>
+      </div>
+    </div>
+  </div>
+
   <main class="app">
     <header>
       <h1>Pink Flipbook</h1>
-      <p class="subtitle">画像を本みたいにストックできるY2K本棚</p>
+      <p class="subtitle">画像本・文字本をストックできるY2K本棚</p>
     </header>
 
     <section class="panel">
       <div class="top-actions">
         <a class="button" href="create.html">＋ 新しい本を作る</a>
+        <button id="renameShelfButton" type="button">本棚名を変える</button>
         <button id="clearAllButton" type="button">本棚を全部消す</button>
       </div>
 
-      <h2 class="bookshelf-title">MY BOOKSHELF</h2>
+      <h2 id="bookshelfTitle" class="bookshelf-title">MY BOOKSHELF</h2>
+      <p class="bookshelf-sub">あなたの本をここにストックできます♡</p>
 
       <div id="bookshelf" class="bookshelf"></div>
 
@@ -225,13 +402,57 @@
   </main>
 
   <script>
+    const welcome = document.getElementById("welcome");
+    const shelfNameInput = document.getElementById("shelfNameInput");
+    const saveShelfNameButton = document.getElementById("saveShelfNameButton");
+
+    const bookshelfTitle = document.getElementById("bookshelfTitle");
     const bookshelf = document.getElementById("bookshelf");
     const emptyShelf = document.getElementById("emptyShelf");
     const clearAllButton = document.getElementById("clearAllButton");
+    const renameShelfButton = document.getElementById("renameShelfButton");
 
     let books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+    let shelfName = localStorage.getItem("pinkFlipbookShelfName");
+
+    if (!shelfName) {
+      welcome.classList.add("show");
+    } else {
+      bookshelfTitle.textContent = shelfName;
+    }
 
     renderBookshelf();
+
+    saveShelfNameButton.addEventListener("click", () => {
+      const name = shelfNameInput.value.trim();
+
+      if (!name) {
+        alert("本棚の名前を入れてください。");
+        return;
+      }
+
+      shelfName = name;
+      localStorage.setItem("pinkFlipbookShelfName", shelfName);
+      bookshelfTitle.textContent = shelfName;
+      welcome.classList.remove("show");
+    });
+
+    renameShelfButton.addEventListener("click", () => {
+      const currentName = localStorage.getItem("pinkFlipbookShelfName") || "";
+      const newName = prompt("新しい本棚名を入れてください。", currentName);
+
+      if (newName === null) return;
+
+      const trimmed = newName.trim();
+
+      if (!trimmed) {
+        alert("本棚名は空にできません。");
+        return;
+      }
+
+      localStorage.setItem("pinkFlipbookShelfName", trimmed);
+      bookshelfTitle.textContent = trimmed;
+    });
 
     clearAllButton.addEventListener("click", () => {
       const ok = confirm("本棚を全部消しますか？");
@@ -256,9 +477,19 @@
         const card = document.createElement("div");
         card.className = "book-card";
 
-        const coverImage = book.images && book.images[0]
+        const isTextBook = book.type === "text";
+
+        const coverImage = !isTextBook && book.images && book.images[0]
           ? '<img src="' + book.images[0] + '" alt="cover" />'
-          : '<div>♡</div>';
+          : isTextBook
+            ? '<div>✍️</div>'
+            : '<div>♡</div>';
+
+        const pageCount = isTextBook
+          ? (book.textPages ? book.textPages.length : 0)
+          : (book.images ? book.images.length : 0);
+
+        const typeLabel = isTextBook ? "文字本" : "画像本";
 
         card.innerHTML = `
           <div>
@@ -266,7 +497,7 @@
               ${coverImage}
             </div>
             <div class="book-title">${escapeHtml(book.title)}</div>
-            <div class="book-meta">${book.images.length} pages</div>
+            <div class="book-meta">${typeLabel} / ${pageCount} pages</div>
             <div class="book-meta">${book.createdAt}</div>
           </div>
 
@@ -293,7 +524,7 @@
     }
 
     function escapeHtml(text) {
-      return text
+      return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
