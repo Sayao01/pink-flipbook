@@ -226,6 +226,14 @@
       text-align: left;
     }
 
+    textarea.over-limit {
+      border-color: #ff2f92;
+      background: rgba(255, 210, 232, 0.95);
+      box-shadow:
+        inset 0 0 12px rgba(255, 47, 146, 0.55),
+        0 0 18px rgba(255, 47, 146, 0.45);
+    }
+
     .counter {
       margin-top: 8px;
       text-align: center;
@@ -236,6 +244,7 @@
 
     .counter.over {
       color: #d0006f;
+      text-shadow: 0 0 8px rgba(255, 47, 146, 0.45);
     }
 
     .small-button {
@@ -263,7 +272,7 @@
   <main class="app">
     <header>
       <h1>Text Book</h1>
-      <p class="subtitle">小説は1ページ2段組・1段500文字までです♡</p>
+      <p class="subtitle">小説は1ページ2段組・1段500文字目安です♡</p>
     </header>
 
     <section class="panel">
@@ -298,8 +307,8 @@
       </div>
 
       <p class="hint">
-        各段は500文字まで入力できます。<br />
-        1ページは「1段目500文字＋2段目500文字」の固定です。
+        500文字を超えても入力できます。<br />
+        超えた欄は赤くなり、保存時に止まります。
       </p>
 
       <div id="pageList" class="page-list"></div>
@@ -385,6 +394,15 @@
         return;
       }
 
+      const hasOverLimit = textPages.some(page =>
+        page.column1.length > 500 || page.column2.length > 500
+      );
+
+      if (hasOverLimit) {
+        alert("500文字を超えている段があります。赤くなっている欄を500文字以内にしてください。");
+        return;
+      }
+
       const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
 
       const newBook = {
@@ -442,13 +460,13 @@
           <div class="columns-editor">
             <div class="column-box">
               <div class="column-label">1段目 / 500文字</div>
-              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
               <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
             </div>
 
             <div class="column-box">
               <div class="column-label">2段目 / 500文字</div>
-              <textarea maxlength="500" class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
               <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
             </div>
           </div>
@@ -474,14 +492,29 @@
 
       document.querySelectorAll("textarea").forEach((textarea) => {
         textarea.addEventListener("input", () => {
-          const pageIndex = textarea.getAttribute("data-page");
-          const column = textarea.getAttribute("data-column");
-          const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
-          counter.textContent = textarea.value.length + " / 500";
+          updateCounter(textarea);
         });
+
+        updateCounter(textarea);
       });
 
       applyEditorStyle();
+    }
+
+    function updateCounter(textarea) {
+      const pageIndex = textarea.getAttribute("data-page");
+      const column = textarea.getAttribute("data-column");
+      const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
+
+      if (!counter) return;
+
+      const count = textarea.value.length;
+      counter.textContent = count + " / 500";
+
+      const isOver = count > 500;
+
+      textarea.classList.toggle("over-limit", isOver);
+      counter.classList.toggle("over", isOver);
     }
 
     function applyEditorStyle() {
