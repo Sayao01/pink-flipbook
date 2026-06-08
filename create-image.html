@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Image Book - Pink Flipbook</title>
+  <title>Create Image Book</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
     * { box-sizing: border-box; }
 
     body {
@@ -18,6 +19,7 @@
         radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
         linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
       color: #7a1456;
+      overflow-x: hidden;
     }
 
     .sparkle {
@@ -41,22 +43,33 @@
     .app {
       position: relative;
       z-index: 1;
-      width: min(900px, 94vw);
+      width: min(1000px, 94vw);
       margin: 0 auto;
       padding: 36px 0 60px;
     }
 
-    header { text-align: center; padding: 24px 10px; }
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
 
     h1 {
       font-size: clamp(34px, 7vw, 70px);
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
-      text-shadow: 0 4px 0 #d95aa9, 0 0 18px #ff4fc3, 0 0 36px #fff;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
     }
 
-    .subtitle { margin-top: 12px; color: #8c1d63; font-weight: bold; line-height: 1.7; }
+    .subtitle {
+      margin-top: 12px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+    }
 
     .panel {
       margin: 24px auto;
@@ -64,12 +77,16 @@
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
-      box-shadow: 0 0 30px rgba(255,105,210,0.45), inset 0 0 18px rgba(255,255,255,0.65);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
       backdrop-filter: blur(12px);
       text-align: center;
     }
 
-    a.button, button, .upload-label {
+    a.button,
+    button,
+    .upload-label {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
@@ -78,17 +95,21 @@
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
-      box-shadow: 0 6px 0 #d95aa9, 0 0 18px rgba(255,141,221,0.9);
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
       color: #7a1456;
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
       font-size: 15px;
     }
 
-    input[type="file"] { display: none; }
+    input[type="file"] {
+      display: none;
+    }
 
     input[type="text"] {
-      width: min(520px, 90vw);
+      width: min(560px, 90vw);
       padding: 15px 18px;
       border-radius: 999px;
       border: 2px solid #fff;
@@ -98,10 +119,11 @@
       font-size: 15px;
       outline: none;
       box-shadow: inset 0 0 12px rgba(255,141,221,0.5);
-      margin: 12px 0;
+      margin: 10px 0;
+      text-align: center;
     }
 
-    .direction-box {
+    .choice-box {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
@@ -109,48 +131,61 @@
       margin: 14px 0;
     }
 
-    .direction-card {
+    .choice-card {
       cursor: pointer;
       width: 170px;
       padding: 14px;
       border-radius: 22px;
       border: 3px solid #fff;
       background: rgba(255,255,255,0.55);
-      box-shadow: 0 7px 0 #d95aa9, 0 0 16px rgba(255,141,221,0.7);
+      box-shadow:
+        0 7px 0 #d95aa9,
+        0 0 16px rgba(255,141,221,0.7);
       font-weight: bold;
+      text-align: center;
     }
 
-    .direction-card.active {
+    .choice-card.active {
       background: linear-gradient(135deg, #fff, #ff9bdf);
       transform: translateY(-3px);
     }
 
-    .hint { color: #9d2a72; font-weight: bold; line-height: 1.8; font-size: 14px; }
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+    }
 
     .preview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 16px;
       margin-top: 22px;
     }
 
     .preview {
-      height: 130px;
-      border-radius: 18px;
+      min-height: 220px;
+      border-radius: 20px;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.55);
       overflow: hidden;
-      position: relative;
       box-shadow: 0 8px 18px rgba(122,20,86,0.18);
+      padding-bottom: 12px;
+      text-align: center;
     }
 
-    .preview img { width: 100%; height: 100%; object-fit: cover; }
+    .preview img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
 
-    .preview span {
-      position: absolute;
-      bottom: 6px;
-      right: 8px;
-      background: rgba(255,255,255,0.8);
+    .preview-number {
+      display: inline-block;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.82);
       color: #b13a86;
       border-radius: 999px;
       padding: 2px 8px;
@@ -158,10 +193,22 @@
       font-weight: bold;
     }
 
+    .small-button {
+      padding: 8px 11px;
+      font-size: 12px;
+      box-shadow:
+        0 4px 0 #d95aa9,
+        0 0 12px rgba(255,141,221,0.9);
+    }
+
     @media (max-width: 700px) {
+      .app { width: 96vw; padding: 24px 0 40px; }
       .panel { padding: 18px; }
       a.button, button, .upload-label { width: 100%; }
-      .direction-card { width: 100%; }
+      .choice-card { width: 100%; }
+      .preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .preview img { height: 120px; }
+      .small-button { width: auto; }
     }
   </style>
 </head>
@@ -172,7 +219,7 @@
   <main class="app">
     <header>
       <h1>Image Book</h1>
-      <p class="subtitle">画像を追加した順番で、本のページになります♡</p>
+      <p class="subtitle">画像を追加した順番で、本になります♡</p>
     </header>
 
     <section class="panel">
@@ -180,20 +227,22 @@
       <a class="button" href="bookshelf.html">本棚に戻る</a>
 
       <div>
-        <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
+        <input id="bookTitleInput" type="text" placeholder="本のタイトル" />
+      </div>
+
+      <div>
+        <input id="bookDateInput" type="text" placeholder="日付 例：2026.6.9 / 2026年6月9日" />
       </div>
 
       <p class="hint">開き方を選んでください。</p>
 
-      <div class="direction-box">
-        <div id="ltrButton" class="direction-card active">左開き</div>
-        <div id="rtlButton" class="direction-card">右開き</div>
+      <div class="choice-box">
+        <div id="rtlButton" class="choice-card active">右開き</div>
+        <div id="ltrButton" class="choice-card">左開き</div>
       </div>
 
-      <div>
-        <label class="upload-label" for="imageInput">画像を選ぶ</label>
-        <input id="imageInput" type="file" accept="image/*" multiple />
-      </div>
+      <label class="upload-label" for="imageInput">画像を選ぶ</label>
+      <input id="imageInput" type="file" accept="image/*" multiple />
 
       <p id="selectedInfo" class="hint">まだ画像が選ばれていません。</p>
 
@@ -205,22 +254,17 @@
 
   <script>
     const bookTitleInput = document.getElementById("bookTitleInput");
+    const bookDateInput = document.getElementById("bookDateInput");
     const imageInput = document.getElementById("imageInput");
     const selectedInfo = document.getElementById("selectedInfo");
     const saveBookButton = document.getElementById("saveBookButton");
     const previewGrid = document.getElementById("previewGrid");
 
-    const ltrButton = document.getElementById("ltrButton");
     const rtlButton = document.getElementById("rtlButton");
+    const ltrButton = document.getElementById("ltrButton");
 
     let selectedImages = [];
-    let direction = "ltr";
-
-    ltrButton.addEventListener("click", () => {
-      direction = "ltr";
-      ltrButton.classList.add("active");
-      rtlButton.classList.remove("active");
-    });
+    let direction = "rtl";
 
     rtlButton.addEventListener("click", () => {
       direction = "rtl";
@@ -228,10 +272,16 @@
       ltrButton.classList.remove("active");
     });
 
+    ltrButton.addEventListener("click", () => {
+      direction = "ltr";
+      ltrButton.classList.add("active");
+      rtlButton.classList.remove("active");
+    });
+
     imageInput.addEventListener("change", async (event) => {
       const files = Array.from(event.target.files);
 
-      selectedImages = await Promise.all(
+      const addedImages = await Promise.all(
         files.map((file) => {
           return new Promise((resolve) => {
             const reader = new FileReader();
@@ -241,14 +291,22 @@
         })
       );
 
+      selectedImages = selectedImages.concat(addedImages);
+      imageInput.value = "";
       renderPreview();
     });
 
     saveBookButton.addEventListener("click", () => {
       const title = bookTitleInput.value.trim();
+      const bookDate = bookDateInput.value.trim();
 
       if (!title) {
         alert("本のタイトルを入れてください。");
+        return;
+      }
+
+      if (!bookDate) {
+        alert("日付を入れてください。");
         return;
       }
 
@@ -262,6 +320,7 @@
       const newBook = {
         id: Date.now().toString(),
         title: title,
+        bookDate: bookDate,
         type: "image",
         direction: direction,
         images: selectedImages,
@@ -289,9 +348,49 @@
       selectedImages.forEach((src, index) => {
         const item = document.createElement("div");
         item.className = "preview";
-        item.innerHTML = `<img src="${src}" alt="preview ${index + 1}" /><span>${index + 1}</span>`;
+
+        item.innerHTML = `
+          <img src="${src}" alt="preview ${index + 1}" />
+          <div class="preview-number">PAGE ${index + 1}</div>
+          <div>
+            <button class="small-button" data-up="${index}" type="button">前へ</button>
+            <button class="small-button" data-down="${index}" type="button">後ろへ</button>
+            <button class="small-button" data-delete="${index}" type="button">消す</button>
+          </div>
+        `;
+
         previewGrid.appendChild(item);
       });
+
+      document.querySelectorAll("[data-delete]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.getAttribute("data-delete"));
+          selectedImages.splice(index, 1);
+          renderPreview();
+        });
+      });
+
+      document.querySelectorAll("[data-up]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.getAttribute("data-up"));
+          moveImage(index, index - 1);
+        });
+      });
+
+      document.querySelectorAll("[data-down]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.getAttribute("data-down"));
+          moveImage(index, index + 1);
+        });
+      });
+    }
+
+    function moveImage(from, to) {
+      if (to < 0 || to >= selectedImages.length) return;
+
+      const item = selectedImages.splice(from, 1)[0];
+      selectedImages.splice(to, 0, item);
+      renderPreview();
     }
   </script>
 </body>
