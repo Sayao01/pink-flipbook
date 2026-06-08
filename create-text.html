@@ -161,7 +161,7 @@
 
     textarea {
       width: 100%;
-      min-height: 260px;
+      min-height: 280px;
       padding: 18px;
       border-radius: 18px;
       border: 2px solid #fff;
@@ -199,7 +199,7 @@
   <main class="app">
     <header>
       <h1>Text Book</h1>
-      <p class="subtitle">小説ログ用に、ページごとに文章を書けます♡</p>
+      <p class="subtitle">小説用に、ページごとに文章を書けます♡</p>
     </header>
 
     <section class="panel">
@@ -211,8 +211,8 @@
       </div>
 
       <p class="hint">
-        ページごとに本文を書いてください。<br />
-        「＋ページを追加」でページを増やせます。
+        文字本は、縦書き・右開きの小説本として保存されます。<br />
+        ページごとに本文を書いてください。
       </p>
 
       <div id="pageList" class="page-list"></div>
@@ -269,6 +269,7 @@
         id: Date.now().toString(),
         title: title,
         type: "text",
+        direction: "rtl",
         images: [],
         textPages: textPages,
         createdAt: new Date().toLocaleString("ja-JP")
