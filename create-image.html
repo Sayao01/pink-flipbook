@@ -104,6 +104,11 @@
       font-size: 15px;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     input[type="file"] {
       display: none;
     }
@@ -219,7 +224,7 @@
   <main class="app">
     <header>
       <h1>Image Book</h1>
-      <p class="subtitle">画像を追加した順番で、本になります♡</p>
+      <p class="subtitle">画像を軽くしてから保存します♡</p>
     </header>
 
     <section class="panel">
@@ -281,19 +286,26 @@
     imageInput.addEventListener("change", async (event) => {
       const files = Array.from(event.target.files);
 
-      const addedImages = await Promise.all(
-        files.map((file) => {
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
+      if (files.length === 0) return;
 
-      selectedImages = selectedImages.concat(addedImages);
-      imageInput.value = "";
-      renderPreview();
+      selectedInfo.textContent = "画像を軽くしています...";
+
+      try {
+        const addedImages = [];
+
+        for (const file of files) {
+          const compressedImage = await compressImage(file);
+          addedImages.push(compressedImage);
+        }
+
+        selectedImages = selectedImages.concat(addedImages);
+        imageInput.value = "";
+        renderPreview();
+      } catch (error) {
+        console.error(error);
+        alert("画像の読み込みに失敗しました。別の画像で試してください。");
+        selectedInfo.textContent = selectedImages.length + "枚の画像を選びました。";
+      }
     });
 
     saveBookButton.addEventListener("click", () => {
@@ -315,24 +327,40 @@
         return;
       }
 
-      const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+      saveBookButton.disabled = true;
+      saveBookButton.textContent = "保存中...";
 
-      const newBook = {
-        id: Date.now().toString(),
-        title: title,
-        bookDate: bookDate,
-        type: "image",
-        direction: direction,
-        images: selectedImages,
-        textPages: [],
-        createdAt: new Date().toLocaleString("ja-JP")
-      };
+      try {
+        const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
 
-      books.unshift(newBook);
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+        const newBook = {
+          id: Date.now().toString(),
+          title: title,
+          bookDate: bookDate,
+          type: "image",
+          direction: direction,
+          images: selectedImages,
+          textPages: [],
+          createdAt: new Date().toLocaleString("ja-JP")
+        };
 
-      alert("画像本を本棚に追加しました♡");
-      window.location.href = "bookshelf.html";
+        books.unshift(newBook);
+        localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+
+        alert("画像本を本棚に追加しました♡");
+        window.location.href = "bookshelf.html";
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "画像がまだ大きすぎるか、枚数が多すぎて保存できませんでした。\n" +
+          "画像を少し減らして試してください。\n\n" +
+          "今はブラウザ内保存なので、たくさん画像を入れるには限界があります。"
+        );
+
+        saveBookButton.disabled = false;
+        saveBookButton.textContent = "画像本を本棚に追加する";
+      }
     });
 
     function renderPreview() {
@@ -391,6 +419,46 @@
       const item = selectedImages.splice(from, 1)[0];
       selectedImages.splice(to, 0, item);
       renderPreview();
+    }
+
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            const maxSize = 1400;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else if (height >= width && height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.72);
+            resolve(compressedDataUrl);
+          };
+
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
   </script>
 </body>
