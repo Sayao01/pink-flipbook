@@ -42,7 +42,7 @@
     .app {
       position: relative;
       z-index: 1;
-      width: min(980px, 94vw);
+      width: min(1120px, 94vw);
       margin: 0 auto;
       padding: 36px 0 60px;
     }
@@ -127,6 +127,7 @@
       background: rgba(255,255,255,0.55);
       box-shadow: 0 7px 0 #d95aa9, 0 0 16px rgba(255,141,221,0.7);
       font-weight: bold;
+      text-align: center;
     }
 
     .choice-card.active {
@@ -143,12 +144,12 @@
 
     .page-list {
       display: grid;
-      gap: 18px;
+      gap: 24px;
       margin-top: 24px;
     }
 
     .page-editor {
-      padding: 18px;
+      padding: 20px;
       border-radius: 24px;
       border: 3px solid #fff;
       background: rgba(255,255,255,0.58);
@@ -175,18 +176,35 @@
 
     textarea {
       width: 100%;
-      min-height: 280px;
-      padding: 18px;
+      min-height: 420px;
+      padding: 28px;
       border-radius: 18px;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.82);
-      color: #5f1747;
-      font-family: "DotGothic16", sans-serif;
-      font-size: 16px;
-      line-height: 1.9;
+      background: rgba(255,255,255,0.88);
+      color: #3f2435;
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif;
+      font-size: 17px;
+      line-height: 2.1;
       outline: none;
       resize: vertical;
-      box-shadow: inset 0 0 12px rgba(255,141,221,0.45);
+      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.45);
+    }
+
+    textarea.vertical-input {
+      height: 520px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 2.1;
+      letter-spacing: 0.06em;
+      overflow-x: auto;
+      overflow-y: hidden;
+      text-align: start;
+    }
+
+    textarea.horizontal-input {
+      writing-mode: horizontal-tb;
+      overflow-y: auto;
+      text-align: left;
     }
 
     .small-button {
@@ -198,10 +216,12 @@
     .bottom-actions { margin-top: 24px; }
 
     @media (max-width: 700px) {
+      .app { width: 96vw; padding: 24px 0 40px; }
       .panel { padding: 18px; }
       a.button, button { width: 100%; }
       .choice-card { width: 100%; }
-      textarea { min-height: 220px; font-size: 14px; }
+      textarea { min-height: 360px; font-size: 15px; padding: 22px; }
+      textarea.vertical-input { height: 440px; }
     }
   </style>
 </head>
@@ -233,9 +253,9 @@
       <p class="hint">フォントを選んでください。</p>
 
       <div class="choice-box">
-        <div id="fontDotButton" class="choice-card active">ドット</div>
-        <div id="fontSerifButton" class="choice-card">明朝</div>
+        <div id="fontSerifButton" class="choice-card active">明朝</div>
         <div id="fontMaruButton" class="choice-card">丸ゴ</div>
+        <div id="fontDotButton" class="choice-card">ドット</div>
       </div>
 
       <p class="hint">文字サイズを選んでください。</p>
@@ -247,8 +267,8 @@
       </div>
 
       <p class="hint">
-        ページごとに本文を書いてください。<br />
-        「＋ページを追加」でページを増やせます。
+        右開きの場合、入力欄も縦書きになります。<br />
+        1ページに入る量を見ながらページを分けてください。
       </p>
 
       <div id="pageList" class="page-list"></div>
@@ -279,7 +299,7 @@
 
     let pages = [""];
     let direction = "rtl";
-    let novelFont = "dot";
+    let novelFont = "serif";
     let novelSize = "medium";
 
     renderPages();
@@ -288,12 +308,14 @@
       direction = "rtl";
       rtlButton.classList.add("active");
       ltrButton.classList.remove("active");
+      renderPages();
     });
 
     ltrButton.addEventListener("click", () => {
       direction = "ltr";
       ltrButton.classList.add("active");
       rtlButton.classList.remove("active");
+      renderPages();
     });
 
     fontDotButton.addEventListener("click", () => setFont("dot"));
@@ -353,6 +375,7 @@
       fontDotButton.classList.toggle("active", font === "dot");
       fontSerifButton.classList.toggle("active", font === "serif");
       fontMaruButton.classList.toggle("active", font === "maru");
+      applyEditorStyle();
     }
 
     function setSize(size) {
@@ -360,14 +383,19 @@
       sizeSmallButton.classList.toggle("active", size === "small");
       sizeMediumButton.classList.toggle("active", size === "medium");
       sizeLargeButton.classList.toggle("active", size === "large");
+      applyEditorStyle();
     }
 
     function renderPages() {
+      saveCurrentText();
+
       pageList.innerHTML = "";
 
       pages.forEach((text, index) => {
         const page = document.createElement("div");
         page.className = "page-editor";
+
+        const inputClass = direction === "rtl" ? "vertical-input" : "horizontal-input";
 
         page.innerHTML = `
           <div class="page-editor-header">
@@ -375,7 +403,7 @@
             <button class="small-button" data-delete="${index}" type="button">このページを消す</button>
           </div>
 
-          <textarea data-page="${index}" placeholder="ここに${index + 1}ページ目の本文を書く">${escapeHtml(text)}</textarea>
+          <textarea class="${inputClass}" data-page="${index}" placeholder="ここに${index + 1}ページ目の本文を書く">${escapeHtml(text)}</textarea>
         `;
 
         pageList.appendChild(page);
@@ -395,6 +423,15 @@
           renderPages();
         });
       });
+
+      applyEditorStyle();
+    }
+
+    function applyEditorStyle() {
+      document.querySelectorAll("textarea").forEach((textarea) => {
+        textarea.style.fontFamily = getFontFamily(novelFont);
+        textarea.style.fontSize = getFontSize(novelSize);
+      });
     }
 
     function saveCurrentText() {
@@ -402,6 +439,18 @@
         const index = Number(textarea.getAttribute("data-page"));
         pages[index] = textarea.value;
       });
+    }
+
+    function getFontFamily(font) {
+      if (font === "dot") return '"DotGothic16", sans-serif';
+      if (font === "maru") return '"Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif';
+      return '"Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif';
+    }
+
+    function getFontSize(size) {
+      if (size === "small") return "15px";
+      if (size === "large") return "20px";
+      return "17px";
     }
 
     function escapeHtml(text) {
