@@ -319,6 +319,7 @@
     const ltrButton = document.getElementById("ltrButton");
 
     let selectedImages = [];
+    let compressionLevels = [];
     let direction = "rtl";
 
     rtlButton.addEventListener("click", () => {
@@ -348,6 +349,8 @@
         }
 
         selectedImages = selectedImages.concat(addedImages);
+        compressionLevels = compressionLevels.concat(addedImages.map(() => 0));
+
         imageInput.value = "";
         renderPreview();
       } catch (error) {
@@ -389,6 +392,7 @@
           type: "image",
           direction: direction,
           images: selectedImages,
+          compressionLevels: compressionLevels,
           textPages: [],
           createdAt: new Date().toLocaleString("ja-JP")
         };
@@ -423,12 +427,14 @@
       selectedInfo.textContent = selectedImages.length + "枚の画像を選びました。";
 
       selectedImages.forEach((src, index) => {
+        const level = compressionLevels[index] || 0;
+
         const item = document.createElement("div");
         item.className = "preview";
 
         item.innerHTML = `
           <img src="${src}" alt="preview ${index + 1}" />
-          <div class="preview-number">PAGE ${index + 1}</div>
+          <div class="preview-number">PAGE ${index + 1} / 圧縮 ${level}</div>
 
           <div class="image-actions">
             <button class="card-button" data-compress-light="${index}" type="button">軽く圧縮</button>
@@ -445,7 +451,10 @@
       document.querySelectorAll("[data-delete]").forEach((button) => {
         button.addEventListener("click", () => {
           const index = Number(button.getAttribute("data-delete"));
+
           selectedImages.splice(index, 1);
+          compressionLevels.splice(index, 1);
+
           renderPreview();
         });
       });
@@ -474,7 +483,7 @@
       document.querySelectorAll("[data-compress-strong]").forEach((button) => {
         button.addEventListener("click", async () => {
           const index = Number(button.getAttribute("data-compress-strong"));
-          await compressOneImage(index, 900, 0.58, button, "もっと圧縮");
+          await compressMoreAndMore(index, button);
         });
       });
     }
@@ -486,7 +495,14 @@
       button.textContent = "圧縮中...";
 
       try {
-        selectedImages[index] = await compressDataUrlImage(selectedImages[index], maxSize, quality);
+        selectedImages[index] = await compressDataUrlImage(
+          selectedImages[index],
+          maxSize,
+          quality
+        );
+
+        compressionLevels[index] = (compressionLevels[index] || 0) + 1;
+
         renderPreview();
       } catch (error) {
         console.error(error);
@@ -496,11 +512,53 @@
       }
     }
 
+    async function compressMoreAndMore(index, button) {
+      if (!selectedImages[index]) return;
+
+      const currentLevel = compressionLevels[index] || 0;
+      const nextLevel = currentLevel + 1;
+
+      const settings = [
+        { maxSize: 1000, quality: 0.62 },
+        { maxSize: 850, quality: 0.55 },
+        { maxSize: 700, quality: 0.48 },
+        { maxSize: 560, quality: 0.42 },
+        { maxSize: 450, quality: 0.36 },
+        { maxSize: 360, quality: 0.30 }
+      ];
+
+      const setting = settings[Math.min(nextLevel - 1, settings.length - 1)];
+
+      button.disabled = true;
+      button.textContent = "圧縮中...";
+
+      try {
+        selectedImages[index] = await compressDataUrlImage(
+          selectedImages[index],
+          setting.maxSize,
+          setting.quality
+        );
+
+        compressionLevels[index] = nextLevel;
+
+        renderPreview();
+      } catch (error) {
+        console.error(error);
+        alert("画像の圧縮に失敗しました。");
+        button.disabled = false;
+        button.textContent = "もっと圧縮";
+      }
+    }
+
     function moveImage(from, to) {
       if (to < 0 || to >= selectedImages.length) return;
 
       const item = selectedImages.splice(from, 1)[0];
+      const level = compressionLevels.splice(from, 1)[0];
+
       selectedImages.splice(to, 0, item);
+      compressionLevels.splice(to, 0, level);
+
       renderPreview();
     }
 
