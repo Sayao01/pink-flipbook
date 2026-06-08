@@ -124,9 +124,27 @@
       overflow: visible;
     }
 
-    #flipbook {
+    #bookShell {
       margin: 0 auto;
       filter: drop-shadow(0 26px 28px rgba(122,20,86,0.35));
+      transition: transform 0.2s ease;
+    }
+
+    /*
+      ここが大事！！
+      右開きのときだけ、本全体を左右反転する。
+      そのあと中身だけもう一回反転して、画像や文字は普通に読めるようにする。
+    */
+    #bookShell.right-opening {
+      transform: scaleX(-1);
+    }
+
+    #bookShell.right-opening .page-content {
+      transform: scaleX(-1);
+    }
+
+    #flipbook {
+      margin: 0 auto;
     }
 
     .page {
@@ -319,12 +337,14 @@
 
       <div id="readerArea">
         <div class="book-area">
-          <div id="flipbook"></div>
+          <div id="bookShell">
+            <div id="flipbook"></div>
+          </div>
         </div>
 
         <div class="controls">
-          <button id="nextButton" type="button">次のページ</button>
           <button id="prevButton" type="button">前のページ</button>
+          <button id="nextButton" type="button">次のページ</button>
         </div>
 
         <p id="pageInfo" class="hint"></p>
@@ -339,6 +359,7 @@
     const subtitle = document.getElementById("subtitle");
     const missingMessage = document.getElementById("missingMessage");
     const readerArea = document.getElementById("readerArea");
+    const bookShell = document.getElementById("bookShell");
     const flipbookElement = document.getElementById("flipbook");
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
@@ -368,6 +389,12 @@
       const typeLabel = isTextBook ? "文字本" : "画像本";
 
       subtitle.textContent = `${typeLabel} / ${directionLabel} で読めます♡`;
+
+      if (isRightOpening) {
+        bookShell.classList.add("right-opening");
+      } else {
+        bookShell.classList.remove("right-opening");
+      }
 
       const pages = [];
 
