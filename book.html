@@ -214,7 +214,6 @@
       overflow: hidden;
       white-space: pre-wrap;
       color: #3f2a36;
-      text-align: left;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -245,7 +244,6 @@
       font-family: "Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif;
     }
 
-    /* 1段500文字を入れるためにかなり小さめ */
     .size-small { font-size: 10.5px; }
     .size-medium { font-size: 11.5px; }
     .size-large { font-size: 12.5px; }
@@ -545,26 +543,19 @@
 
     function createNovelPages() {
       const rawPages = currentBook.textPages || [];
-      const fullText = rawPages.join("\n\n");
-
-      const chunks = splitTextByLength(fullText, 500);
-      const pagePairs = [];
-
-      for (let i = 0; i < chunks.length; i += 2) {
-        pagePairs.push([chunks[i] || "", chunks[i + 1] || ""]);
-      }
+      const normalizedPages = normalizeTextPages(rawPages);
 
       const fontClass = getFontClass(currentBook.novelFont);
       const sizeClass = getSizeClass(currentBook.novelSize);
       const columnDirectionClass = isRightOpening ? "vertical-columns" : "horizontal-columns";
 
-      return pagePairs.map((pair, index) => {
+      return normalizedPages.map((page, index) => {
         return `
           <div class="page">
             <div class="page-content novel-page">
               <div class="novel-columns ${columnDirectionClass}">
-                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(pair[0])}</div>
-                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(pair[1])}</div>
+                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(page.column1 || "")}</div>
+                <div class="novel-column ${fontClass} ${sizeClass}">${escapeHtml(page.column2 || "")}</div>
               </div>
               <div class="page-number">${index + 1}</div>
             </div>
@@ -573,15 +564,33 @@
       });
     }
 
-    function splitTextByLength(text, length) {
-      const cleanText = String(text).replace(/\n{3,}/g, "\n\n");
-      const result = [];
+    function normalizeTextPages(rawPages) {
+      if (rawPages.length === 0) return [];
 
-      for (let i = 0; i < cleanText.length; i += length) {
-        result.push(cleanText.slice(i, i + length));
+      if (typeof rawPages[0] === "object") {
+        return rawPages.map(page => ({
+          column1: page.column1 || "",
+          column2: page.column2 || ""
+        }));
       }
 
-      return result;
+      const joinedText = rawPages.join("\n\n");
+      const chunks = [];
+
+      for (let i = 0; i < joinedText.length; i += 500) {
+        chunks.push(joinedText.slice(i, i + 500));
+      }
+
+      const pages = [];
+
+      for (let i = 0; i < chunks.length; i += 2) {
+        pages.push({
+          column1: chunks[i] || "",
+          column2: chunks[i + 1] || ""
+        });
+      }
+
+      return pages;
     }
 
     nextButton.addEventListener("click", () => {
