@@ -74,7 +74,7 @@
 
     .panel {
       margin: 24px auto;
-      padding: 28px;
+      padding: 30px;
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.46);
@@ -85,14 +85,11 @@
       text-align: center;
     }
 
-    a.button,
-    button,
-    .upload-label {
+    .back-button {
       text-decoration: none;
       display: inline-block;
-      cursor: pointer;
-      margin: 8px;
-      padding: 13px 24px;
+      margin-bottom: 24px;
+      padding: 12px 22px;
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
@@ -100,62 +97,63 @@
         0 6px 0 #d95aa9,
         0 0 18px rgba(255, 141, 221, 0.9);
       color: #7a1456;
-      font-family: "DotGothic16", sans-serif;
       font-weight: bold;
-      font-size: 15px;
     }
 
-    input[type="file"] {
-      display: none;
+    .choice-area {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
     }
 
-    input[type="text"],
-    textarea {
-      width: min(520px, 90vw);
-      padding: 15px 18px;
-      border-radius: 22px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.78);
+    .choice-card {
+      text-decoration: none;
       color: #7a1456;
-      font-family: "DotGothic16", sans-serif;
-      font-size: 15px;
-      outline: none;
-      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.5);
-      margin: 12px 0;
-    }
-
-    input[type="text"] {
-      border-radius: 999px;
-    }
-
-    textarea {
       min-height: 260px;
-      resize: vertical;
-      line-height: 1.8;
-    }
-
-    .mode-box {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 18px 0;
-    }
-
-    .mode-card {
-      cursor: pointer;
-      width: 180px;
-      padding: 18px;
-      border-radius: 24px;
+      padding: 28px 20px;
+      border-radius: 30px;
       border: 3px solid #fff;
-      background: rgba(255,255,255,0.55);
-      box-shadow: 0 8px 0 #d95aa9, 0 0 18px rgba(255, 141, 221, 0.7);
-      font-weight: bold;
+      background:
+        radial-gradient(circle at top left, #fff, transparent 30%),
+        linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,170,225,0.82));
+      box-shadow:
+        0 12px 0 #d95aa9,
+        0 0 24px rgba(255, 105, 210, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .mode-card.active {
-      background: linear-gradient(135deg, #fff, #ff9bdf);
-      transform: translateY(-3px);
+    .choice-card:hover {
+      transform: translateY(-6px) rotate(-1deg);
+      box-shadow:
+        0 16px 0 #d95aa9,
+        0 0 32px rgba(255, 105, 210, 0.75);
+    }
+
+    .icon {
+      font-size: 56px;
+      margin-bottom: 18px;
+    }
+
+    .choice-title {
+      font-size: 24px;
+      color: #fff;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 16px #ff4fc3;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .choice-text {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #8c1d63;
+      font-weight: bold;
     }
 
     .hint {
@@ -163,45 +161,7 @@
       font-weight: bold;
       line-height: 1.8;
       font-size: 14px;
-    }
-
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 14px;
-      margin-top: 22px;
-    }
-
-    .preview {
-      height: 130px;
-      border-radius: 18px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.5);
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 8px 18px rgba(122, 20, 86, 0.18);
-    }
-
-    .preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .preview span {
-      position: absolute;
-      bottom: 6px;
-      right: 8px;
-      background: rgba(255,255,255,0.8);
-      color: #b13a86;
-      border-radius: 999px;
-      padding: 2px 8px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .hidden {
-      display: none;
+      margin-top: 26px;
     }
   </style>
 </head>
@@ -212,191 +172,38 @@
   <main class="app">
     <header>
       <h1>Create Book</h1>
-      <p class="subtitle">画像の本にするか、文字の本にするか選べます♡</p>
+      <p class="subtitle">まず、どんな本を作るか選んでください♡</p>
     </header>
 
     <section class="panel">
-      <a class="button" href="index.html">← 本棚に戻る</a>
+      <a class="back-button" href="index.html">← 本棚に戻る</a>
 
-      <div>
-        <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
+      <div class="choice-area">
+        <a class="choice-card" href="create-image.html">
+          <div class="icon">🖼️</div>
+          <div class="choice-title">画像で作る</div>
+          <div class="choice-text">
+            イラスト、漫画、写真ログ向け。<br />
+            画像を追加した順番で<br />
+            ページになります。
+          </div>
+        </a>
+
+        <a class="choice-card" href="create-text.html">
+          <div class="icon">✍️</div>
+          <div class="choice-title">文字で作る</div>
+          <div class="choice-text">
+            小説ログ、文章まとめ向け。<br />
+            ページごとに本文を編集して<br />
+            本にできます。
+          </div>
+        </a>
       </div>
-
-      <p class="hint">まず、本のタイプを選んでください。</p>
-
-      <div class="mode-box">
-        <div id="imageModeButton" class="mode-card active">
-          画像で作る
-        </div>
-        <div id="textModeButton" class="mode-card">
-          文字で作る
-        </div>
-      </div>
-
-      <div id="imageArea">
-        <label class="upload-label" for="imageInput">画像を選ぶ</label>
-        <input id="imageInput" type="file" accept="image/*" multiple />
-
-        <p id="selectedInfo" class="hint">
-          まだ画像が選ばれていません。
-        </p>
-
-        <div id="previewGrid" class="preview-grid"></div>
-      </div>
-
-      <div id="textAreaBox" class="hidden">
-        <p class="hint">
-          本文を書いてください。<br />
-          ページを分けたいところに <b>---page---</b> と入れてください。
-        </p>
-
-        <textarea id="novelTextInput" placeholder="ここに本文を書く
-
----page---
-
-ここから次のページ"></textarea>
-      </div>
-
-      <button id="saveBookButton" type="button">本棚に追加する</button>
 
       <p class="hint">
-        今は試作品なので、このブラウザの中にだけ保存されます。<br />
-        Googleログインとネット保存はあとで追加します。
+        画像か文字を選んだあと、それぞれ専用の作成画面に移動します。
       </p>
     </section>
   </main>
-
-  <script>
-    const bookTitleInput = document.getElementById("bookTitleInput");
-
-    const imageModeButton = document.getElementById("imageModeButton");
-    const textModeButton = document.getElementById("textModeButton");
-
-    const imageArea = document.getElementById("imageArea");
-    const textAreaBox = document.getElementById("textAreaBox");
-
-    const imageInput = document.getElementById("imageInput");
-    const selectedInfo = document.getElementById("selectedInfo");
-    const previewGrid = document.getElementById("previewGrid");
-
-    const novelTextInput = document.getElementById("novelTextInput");
-    const saveBookButton = document.getElementById("saveBookButton");
-
-    let mode = "image";
-    let selectedImages = [];
-
-    imageModeButton.addEventListener("click", () => {
-      mode = "image";
-      imageModeButton.classList.add("active");
-      textModeButton.classList.remove("active");
-      imageArea.classList.remove("hidden");
-      textAreaBox.classList.add("hidden");
-    });
-
-    textModeButton.addEventListener("click", () => {
-      mode = "text";
-      textModeButton.classList.add("active");
-      imageModeButton.classList.remove("active");
-      textAreaBox.classList.remove("hidden");
-      imageArea.classList.add("hidden");
-    });
-
-    imageInput.addEventListener("change", async (event) => {
-      const files = Array.from(event.target.files);
-
-      selectedImages = await Promise.all(
-        files.map((file) => {
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
-
-      renderPreview();
-    });
-
-    saveBookButton.addEventListener("click", () => {
-      const title = bookTitleInput.value.trim();
-
-      if (!title) {
-        alert("本のタイトルを入れてください。");
-        return;
-      }
-
-      const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
-
-      let newBook;
-
-      if (mode === "image") {
-        if (selectedImages.length === 0) {
-          alert("画像を選んでください。");
-          return;
-        }
-
-        newBook = {
-          id: Date.now().toString(),
-          title: title,
-          type: "image",
-          images: selectedImages,
-          textPages: [],
-          createdAt: new Date().toLocaleString("ja-JP")
-        };
-      }
-
-      if (mode === "text") {
-        const text = novelTextInput.value.trim();
-
-        if (!text) {
-          alert("本文を書いてください。");
-          return;
-        }
-
-        const textPages = text
-          .split("---page---")
-          .map(page => page.trim())
-          .filter(page => page.length > 0);
-
-        newBook = {
-          id: Date.now().toString(),
-          title: title,
-          type: "text",
-          images: [],
-          textPages: textPages,
-          createdAt: new Date().toLocaleString("ja-JP")
-        };
-      }
-
-      books.unshift(newBook);
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
-
-      alert("本棚に追加しました♡");
-      window.location.href = "index.html";
-    });
-
-    function renderPreview() {
-      previewGrid.innerHTML = "";
-
-      if (selectedImages.length === 0) {
-        selectedInfo.textContent = "まだ画像が選ばれていません。";
-        return;
-      }
-
-      selectedInfo.textContent = selectedImages.length + "枚の画像を選びました。";
-
-      selectedImages.forEach((src, index) => {
-        const item = document.createElement("div");
-        item.className = "preview";
-
-        item.innerHTML = `
-          <img src="${src}" alt="preview ${index + 1}" />
-          <span>${index + 1}</span>
-        `;
-
-        previewGrid.appendChild(item);
-      });
-    }
-  </script>
 </body>
 </html>
