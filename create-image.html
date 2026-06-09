@@ -281,6 +281,8 @@
       <a class="button" href="create.html">← 種類選択に戻る</a>
       <a class="button" href="bookshelf.html">本棚に戻る</a>
 
+      <p id="loginUser" class="hint"></p>
+
       <div>
         <input id="bookTitleInput" type="text" placeholder="本のタイトル" />
       </div>
@@ -307,13 +309,18 @@
     </section>
   </main>
 
+  <script src="db.js"></script>
+
   <script>
+    const currentUser = requireLogin();
+
     const bookTitleInput = document.getElementById("bookTitleInput");
     const bookDateInput = document.getElementById("bookDateInput");
     const imageInput = document.getElementById("imageInput");
     const selectedInfo = document.getElementById("selectedInfo");
     const saveBookButton = document.getElementById("saveBookButton");
     const previewGrid = document.getElementById("previewGrid");
+    const loginUser = document.getElementById("loginUser");
 
     const rtlButton = document.getElementById("rtlButton");
     const ltrButton = document.getElementById("ltrButton");
@@ -321,6 +328,10 @@
     let selectedImages = [];
     let compressionLevels = [];
     let direction = "rtl";
+
+    if (currentUser) {
+      loginUser.textContent = "ログイン中：" + currentUser;
+    }
 
     rtlButton.addEventListener("click", () => {
       direction = "rtl";
@@ -360,9 +371,15 @@
       }
     });
 
-    saveBookButton.addEventListener("click", () => {
+    saveBookButton.addEventListener("click", async () => {
       const title = bookTitleInput.value.trim();
       const bookDate = bookDateInput.value.trim();
+
+      if (!currentUser) {
+        alert("ログインしてください。");
+        window.location.href = "login.html";
+        return;
+      }
 
       if (!title) {
         alert("本のタイトルを入れてください。");
@@ -383,10 +400,11 @@
       saveBookButton.textContent = "保存中...";
 
       try {
-        const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+        const now = Date.now();
 
         const newBook = {
-          id: Date.now().toString(),
+          id: String(now),
+          userName: currentUser,
           title: title,
           bookDate: bookDate,
           type: "image",
@@ -394,11 +412,12 @@
           images: selectedImages,
           compressionLevels: compressionLevels,
           textPages: [],
-          createdAt: new Date().toLocaleString("ja-JP")
+          createdAt: new Date().toLocaleString("ja-JP"),
+          createdAtNumber: now,
+          updatedAt: new Date().toLocaleString("ja-JP")
         };
 
-        books.unshift(newBook);
-        localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+        await saveBookToDB(newBook);
 
         alert("画像本を本棚に追加しました♡");
         window.location.href = "bookshelf.html";
