@@ -96,6 +96,11 @@
       font-size: 15px;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     input[type="text"] {
       width: min(560px, 90vw);
       padding: 15px 18px;
@@ -107,7 +112,8 @@
       font-size: 15px;
       outline: none;
       box-shadow: inset 0 0 12px rgba(255,141,221,0.5);
-      margin: 12px 0;
+      margin: 10px 0;
+      text-align: center;
     }
 
     .choice-box {
@@ -279,8 +285,14 @@
       <a class="button" href="create.html">← 種類選択に戻る</a>
       <a class="button" href="bookshelf.html">本棚に戻る</a>
 
+      <p id="loginUser" class="hint"></p>
+
       <div>
         <input id="bookTitleInput" type="text" placeholder="本のタイトルを入れてください" />
+      </div>
+
+      <div>
+        <input id="bookDateInput" type="text" placeholder="日付 例：2026.6.9 / 2026年6月9日" />
       </div>
 
       <p class="hint">開き方を選んでください。</p>
@@ -320,11 +332,17 @@
     </section>
   </main>
 
+  <script src="db.js"></script>
+
   <script>
+    const currentUser = requireLogin();
+
     const bookTitleInput = document.getElementById("bookTitleInput");
+    const bookDateInput = document.getElementById("bookDateInput");
     const pageList = document.getElementById("pageList");
     const addPageButton = document.getElementById("addPageButton");
     const saveBookButton = document.getElementById("saveBookButton");
+    const loginUser = document.getElementById("loginUser");
 
     const rtlButton = document.getElementById("rtlButton");
     const ltrButton = document.getElementById("ltrButton");
@@ -342,7 +360,10 @@
     let novelFont = "serif";
     let novelSize = "medium";
 
-    renderPages();
+    if (currentUser) {
+      loginUser.textContent = "ログイン中：" + currentUser;
+      renderPages();
+    }
 
     rtlButton.addEventListener("click", () => {
       direction = "rtl";
@@ -372,13 +393,25 @@
       renderPages();
     });
 
-    saveBookButton.addEventListener("click", () => {
+    saveBookButton.addEventListener("click", async () => {
       saveCurrentText();
 
       const title = bookTitleInput.value.trim();
+      const bookDate = bookDateInput.value.trim();
+
+      if (!currentUser) {
+        alert("ログインしてください。");
+        window.location.href = "login.html";
+        return;
+      }
 
       if (!title) {
         alert("本のタイトルを入れてください。");
+        return;
+      }
+
+      if (!bookDate) {
+        alert("日付を入れてください。");
         return;
       }
 
@@ -403,25 +436,39 @@
         return;
       }
 
-      const books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
+      saveBookButton.disabled = true;
+      saveBookButton.textContent = "保存中...";
 
-      const newBook = {
-        id: Date.now().toString(),
-        title: title,
-        type: "text",
-        direction: direction,
-        novelFont: novelFont,
-        novelSize: novelSize,
-        images: [],
-        textPages: textPages,
-        createdAt: new Date().toLocaleString("ja-JP")
-      };
+      try {
+        const now = Date.now();
 
-      books.unshift(newBook);
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+        const newBook = {
+          id: String(now),
+          userName: currentUser,
+          title: title,
+          bookDate: bookDate,
+          type: "text",
+          direction: direction,
+          novelFont: novelFont,
+          novelSize: novelSize,
+          images: [],
+          textPages: textPages,
+          createdAt: new Date().toLocaleString("ja-JP"),
+          createdAtNumber: now,
+          updatedAt: new Date().toLocaleString("ja-JP")
+        };
 
-      alert("文字本を本棚に追加しました♡");
-      window.location.href = "bookshelf.html";
+        await saveBookToDB(newBook);
+
+        alert("文字本を本棚に追加しました♡");
+        window.location.href = "bookshelf.html";
+      } catch (error) {
+        console.error(error);
+        alert("保存に失敗しました。もう一度試してください。");
+
+        saveBookButton.disabled = false;
+        saveBookButton.textContent = "文字本を本棚に追加する";
+      }
     });
 
     function setFont(font) {
@@ -460,13 +507,13 @@
           <div class="columns-editor">
             <div class="column-box">
               <div class="column-label">1段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${pageData.column1}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
               <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
             </div>
 
             <div class="column-box">
               <div class="column-label">2段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${pageData.column2}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
               <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
             </div>
           </div>
@@ -547,6 +594,15 @@
       if (size === "small") return "13px";
       if (size === "large") return "16px";
       return "14.5px";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
   </script>
 </body>
