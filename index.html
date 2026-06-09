@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flipbook maker</title>
+  <title>Pink Flipbook</title>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -18,7 +21,11 @@
         radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
         linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
       color: #7a1456;
-      overflow-x: hidden;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     .sparkle {
@@ -39,34 +46,22 @@
       to { transform: translateY(-80px); }
     }
 
-    .app {
+    .card {
       position: relative;
       z-index: 1;
-      width: min(760px, 94vw);
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 30px 0;
-    }
-
-    .card {
-      width: 100%;
+      width: min(600px, 90vw);
       padding: 34px 24px;
-      border-radius: 34px;
-      border: 3px solid #fff;
+      border-radius: 32px;
+      border: 3px solid rgba(255,255,255,0.9);
       background: rgba(255,255,255,0.52);
       box-shadow:
-        0 14px 0 #d95aa9,
-        0 0 34px rgba(255, 105, 210, 0.75),
+        0 0 30px rgba(255,105,210,0.45),
         inset 0 0 18px rgba(255,255,255,0.65);
-      text-align: center;
       backdrop-filter: blur(12px);
     }
 
     h1 {
-      font-size: clamp(38px, 10vw, 82px);
+      font-size: clamp(38px, 9vw, 78px);
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
@@ -77,46 +72,29 @@
       word-break: break-word;
     }
 
-    .subtitle {
+    p {
       color: #8c1d63;
       font-weight: bold;
       line-height: 1.8;
-      margin: 16px 0 22px;
+      margin-top: 18px;
     }
 
-    input {
-      width: min(440px, 90vw);
-      padding: 15px 18px;
-      border-radius: 999px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.85);
-      color: #7a1456;
-      font-family: "DotGothic16", sans-serif;
-      font-size: 15px;
-      outline: none;
-      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.5);
-      text-align: center;
-    }
-
-    button, a.button {
+    a.button {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
-      margin: 12px 6px 0;
+      margin-top: 16px;
       padding: 13px 24px;
       border-radius: 999px;
       background: linear-gradient(180deg, #ffffff, #ff9bdf);
       border: 2px solid #fff;
-      box-shadow: 0 6px 0 #d95aa9, 0 0 18px rgba(255,141,221,0.9);
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
       color: #7a1456;
       font-family: "DotGothic16", sans-serif;
       font-weight: bold;
       font-size: 15px;
-    }
-
-    @media (max-width: 700px) {
-      .card { padding: 28px 18px; }
-      button, a.button { width: 100%; }
     }
   </style>
 </head>
@@ -124,41 +102,20 @@
 <body>
   <div class="sparkle"></div>
 
-  <main class="app">
-    <section class="card">
-      <h1>Pink Flipbook</h1>
-      <p class="subtitle">
-        画像本・文字本のログを残せる<br />
-        自分だけの本棚を作ろう♡
-      </p>
-
-      <input id="shelfNameInput" type="text" placeholder="本棚の名前 例：夢であえる本棚" />
-
-      <div>
-        <button id="startButton" type="button">本棚をはじめる</button>
-        <a class="button" href="bookshelf.html">本棚に入る</a>
-      </div>
-    </section>
-  </main>
+  <div class="card">
+    <h1>Pink Flipbook</h1>
+    <p>ログイン状態を確認しています...</p>
+    <a class="button" href="login.html">ログイン画面へ</a>
+  </div>
 
   <script>
-    const input = document.getElementById("shelfNameInput");
-    const button = document.getElementById("startButton");
+    const currentUser = localStorage.getItem("pinkFlipbookCurrentUser");
 
-    const savedName = localStorage.getItem("pinkFlipbookShelfName");
-    if (savedName) input.value = savedName;
-
-    button.addEventListener("click", () => {
-      const name = input.value.trim();
-
-      if (!name) {
-        alert("本棚の名前を入れてください。");
-        return;
-      }
-
-      localStorage.setItem("pinkFlipbookShelfName", name);
+    if (currentUser) {
       window.location.href = "bookshelf.html";
-    });
+    } else {
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>
