@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Pink Flipbook</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DotGothic16", sans-serif;
+      background:
+        radial-gradient(circle at top left, #fff0fb, transparent 28%),
+        radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
+        linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
+      color: #7a1456;
+      overflow-x: hidden;
+    }
+
+    .sparkle {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle, rgba(255,255,255,0.7) 0 1px, transparent 2px);
+      background-size: 90px 90px, 50px 50px;
+      animation: glitter 8s linear infinite;
+      opacity: 0.65;
+      z-index: 0;
+    }
+
+    @keyframes glitter {
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(680px, 92vw);
+      margin: 0 auto;
+      padding: 42px 0 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
+
+    h1 {
+      font-size: clamp(38px, 9vw, 78px);
+      margin: 0;
+      color: #fff;
+      letter-spacing: 5px;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
+      word-break: break-word;
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.8;
+    }
+
+    .panel {
+      margin: 24px auto;
+      padding: 28px;
+      border-radius: 32px;
+      border: 3px solid rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.50);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    button {
+      cursor: pointer;
+      margin: 8px;
+      padding: 13px 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #ff9bdf);
+      border: 2px solid #fff;
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    button.active {
+      background: linear-gradient(180deg, #fff, #ff6fc9);
+      transform: translateY(-2px);
+    }
+
+    input {
+      width: min(460px, 86vw);
+      padding: 15px 18px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.82);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-size: 15px;
+      outline: none;
+      box-shadow: inset 0 0 12px rgba(255,141,221,0.5);
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .danger {
+      color: #d0006f;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        width: 94vw;
+        padding: 28px 0 40px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sparkle"></div>
+
+  <main class="app">
+    <header>
+      <h1>LOGIN</h1>
+      <p class="subtitle">端末内ユーザーで本棚を分けます♡</p>
+    </header>
+
+    <section class="panel">
+      <div class="tabs">
+        <button id="loginTab" class="active" type="button">ログイン</button>
+        <button id="registerTab" type="button">新規登録</button>
+      </div>
+
+      <div>
+        <input id="userNameInput" type="text" placeholder="ユーザーネーム" autocomplete="username" />
+      </div>
+
+      <div>
+        <input id="passwordInput" type="password" placeholder="パスワード" autocomplete="current-password" />
+      </div>
+
+      <button id="submitButton" type="button">ログインする</button>
+
+      <p id="message" class="hint"></p>
+
+      <p class="hint">
+        ※これは同じ端末・同じブラウザ内だけの簡易ログインです。<br />
+        サイトデータを消すとユーザー情報や本棚も消える可能性があります。
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const loginTab = document.getElementById("loginTab");
+    const registerTab = document.getElementById("registerTab");
+    const userNameInput = document.getElementById("userNameInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const submitButton = document.getElementById("submitButton");
+    const message = document.getElementById("message");
+
+    let mode = "login";
+
+    loginTab.addEventListener("click", () => {
+      mode = "login";
+      loginTab.classList.add("active");
+      registerTab.classList.remove("active");
+      submitButton.textContent = "ログインする";
+      message.textContent = "";
+      passwordInput.setAttribute("autocomplete", "current-password");
+    });
+
+    registerTab.addEventListener("click", () => {
+      mode = "register";
+      registerTab.classList.add("active");
+      loginTab.classList.remove("active");
+      submitButton.textContent = "登録する";
+      message.textContent = "";
+      passwordInput.setAttribute("autocomplete", "new-password");
+    });
+
+    submitButton.addEventListener("click", async () => {
+      const userName = normalizeUserName(userNameInput.value);
+      const password = passwordInput.value;
+
+      if (!userName) {
+        showMessage("ユーザーネームを入れてください。", true);
+        return;
+      }
+
+      if (!password) {
+        showMessage("パスワードを入れてください。", true);
+        return;
+      }
+
+      const users = getUsers();
+
+      if (mode === "register") {
+        if (users[userName]) {
+          showMessage("このユーザーネームはすでに使われています。", true);
+          return;
+        }
+
+        const passwordHash = await hashPassword(password);
+
+        users[userName] = {
+          userName: userName,
+          passwordHash: passwordHash,
+          createdAt: new Date().toLocaleString("ja-JP")
+        };
+
+        localStorage.setItem("pinkFlipbookUsers", JSON.stringify(users));
+        localStorage.setItem("pinkFlipbookCurrentUser", userName);
+
+        if (!localStorage.getItem("pinkFlipbookShelfName_" + userName)) {
+          localStorage.setItem("pinkFlipbookShelfName_" + userName, userName + "の本棚");
+        }
+
+        window.location.href = "bookshelf.html";
+        return;
+      }
+
+      if (mode === "login") {
+        if (!users[userName]) {
+          showMessage("このユーザーは登録されていません。", true);
+          return;
+        }
+
+        const passwordHash = await hashPassword(password);
+
+        if (users[userName].passwordHash !== passwordHash) {
+          showMessage("パスワードが違います。", true);
+          return;
+        }
+
+        localStorage.setItem("pinkFlipbookCurrentUser", userName);
+        window.location.href = "bookshelf.html";
+      }
+    });
+
+    passwordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        submitButton.click();
+      }
+    });
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem("pinkFlipbookUsers")) || {};
+    }
+
+    function normalizeUserName(name) {
+      return String(name)
+        .trim()
+        .replace(/\s+/g, "_")
+        .toLowerCase();
+    }
+
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+      return hashArray
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    function showMessage(text, isError) {
+      message.textContent = text;
+      message.classList.toggle("danger", isError);
+    }
+  </script>
+</body>
+</html>
