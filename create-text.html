@@ -460,13 +460,13 @@
           <div class="columns-editor">
             <div class="column-box">
               <div class="column-label">1段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${pageData.column1}</textarea>
               <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
             </div>
 
             <div class="column-box">
               <div class="column-label">2段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
+              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${pageData.column2}</textarea>
               <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
             </div>
           </div>
@@ -547,15 +547,6 @@
       if (size === "small") return "13px";
       if (size === "large") return "16px";
       return "14.5px";
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
     }
   </script>
 </body>
