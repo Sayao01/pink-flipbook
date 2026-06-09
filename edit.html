@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edit Book</title>
+  <title>Create Book</title>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Kosugi+Maru&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -43,9 +45,9 @@
     .app {
       position: relative;
       z-index: 1;
-      width: min(1120px, 94vw);
+      width: min(900px, 94vw);
       margin: 0 auto;
-      padding: 36px 0 60px;
+      padding: 42px 0 60px;
     }
 
     header {
@@ -54,7 +56,7 @@
     }
 
     h1 {
-      font-size: clamp(34px, 7vw, 70px);
+      font-size: clamp(38px, 8vw, 78px);
       margin: 0;
       color: #fff;
       letter-spacing: 5px;
@@ -66,18 +68,18 @@
     }
 
     .subtitle {
-      margin-top: 12px;
+      margin-top: 14px;
       color: #8c1d63;
       font-weight: bold;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .panel {
       margin: 24px auto;
-      padding: 28px;
+      padding: 30px;
       border-radius: 32px;
       border: 3px solid rgba(255,255,255,0.9);
-      background: rgba(255,255,255,0.46);
+      background: rgba(255,255,255,0.50);
       box-shadow:
         0 0 30px rgba(255,105,210,0.45),
         inset 0 0 18px rgba(255,255,255,0.65);
@@ -85,9 +87,60 @@
       text-align: center;
     }
 
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin: 26px 0;
+    }
+
+    .choice {
+      text-decoration: none;
+      min-height: 210px;
+      padding: 26px 18px;
+      border-radius: 28px;
+      border: 3px solid #fff;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.88), rgba(255,177,230,0.78));
+      box-shadow:
+        0 10px 0 #d95aa9,
+        0 0 22px rgba(255,105,210,0.55);
+      color: #7a1456;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.15s ease;
+    }
+
+    .choice:hover {
+      transform: translateY(-4px);
+    }
+
+    .choice-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .choice-title {
+      font-size: 24px;
+      color: #fff;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 16px #ff4fc3;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .choice-text {
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
     a.button,
-    button,
-    .upload-label {
+    button {
       text-decoration: none;
       display: inline-block;
       cursor: pointer;
@@ -105,57 +158,6 @@
       font-size: 15px;
     }
 
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    input[type="text"] {
-      width: min(560px, 90vw);
-      padding: 15px 18px;
-      border-radius: 999px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.78);
-      color: #7a1456;
-      font-family: "DotGothic16", sans-serif;
-      font-size: 15px;
-      outline: none;
-      box-shadow: inset 0 0 12px rgba(255,141,221,0.5);
-      margin: 10px 0;
-      text-align: center;
-    }
-
-    .choice-box {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 14px 0;
-    }
-
-    .choice-card {
-      cursor: pointer;
-      width: 170px;
-      padding: 14px;
-      border-radius: 22px;
-      border: 3px solid #fff;
-      background: rgba(255,255,255,0.55);
-      box-shadow:
-        0 7px 0 #d95aa9,
-        0 0 16px rgba(255,141,221,0.7);
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .choice-card.active {
-      background: linear-gradient(135deg, #fff, #ff9bdf);
-      transform: translateY(-3px);
-    }
-
     .hint {
       color: #9d2a72;
       font-weight: bold;
@@ -163,248 +165,28 @@
       font-size: 14px;
     }
 
-    .section-title {
-      color: #fff;
-      font-size: 24px;
-      text-shadow:
-        0 3px 0 #d95aa9,
-        0 0 18px #ff4fc3;
-      letter-spacing: 3px;
-      margin-top: 26px;
-    }
-
-    .hidden { display: none; }
-
-    .danger { color: #b71970; }
-
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-      gap: 18px;
-      margin-top: 24px;
-    }
-
-    .preview {
-      border-radius: 24px;
-      border: 3px solid #fff;
-      background: rgba(255,255,255,0.62);
-      overflow: hidden;
-      box-shadow:
-        0 8px 0 #d95aa9,
-        0 0 18px rgba(122,20,86,0.18);
-      padding: 12px;
-      text-align: center;
-    }
-
-    .preview img {
-      width: 100%;
-      height: 190px;
-      object-fit: contain;
-      display: block;
-      background: rgba(255,255,255,0.8);
-      border-radius: 16px;
-      border: 2px solid #fff;
-    }
-
-    .preview-number {
-      display: inline-block;
-      margin: 10px 0 8px;
-      background: rgba(255,255,255,0.85);
-      color: #b13a86;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .image-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .image-actions .card-button {
-      width: 100%;
-      margin: 0;
-      padding: 9px 6px;
-      border-radius: 14px;
-      font-size: 12px;
-      box-shadow:
-        0 3px 0 #d95aa9,
-        0 0 10px rgba(255,141,221,0.9);
-    }
-
-    .image-actions .danger-button {
-      grid-column: 1 / -1;
-      background: linear-gradient(180deg, #ffffff, #ff7bbb);
-    }
-
-    .page-list {
-      display: grid;
-      gap: 24px;
-      margin-top: 24px;
-    }
-
-    .page-editor {
-      padding: 20px;
-      border-radius: 24px;
-      border: 3px solid #fff;
-      background: rgba(255,255,255,0.58);
-      box-shadow:
-        0 8px 0 #d95aa9,
-        0 0 20px rgba(255,141,221,0.55);
-      text-align: left;
-    }
-
-    .page-editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .page-label {
-      color: #fff;
-      font-size: 20px;
-      text-shadow:
-        0 3px 0 #d95aa9,
-        0 0 14px #ff4fc3;
-      letter-spacing: 2px;
-      font-weight: bold;
-    }
-
-    .columns-editor {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    .column-box {
-      background: rgba(255,255,255,0.45);
-      border: 2px solid #fff;
-      border-radius: 20px;
-      padding: 14px;
-    }
-
-    .column-label {
-      color: #9d2a72;
-      font-weight: bold;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    textarea {
-      width: 100%;
-      height: 360px;
-      padding: 18px;
-      border-radius: 18px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.9);
-      color: #3f2435;
-      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif;
-      font-size: 15px;
-      line-height: 1.9;
-      outline: none;
-      resize: vertical;
-      box-shadow: inset 0 0 12px rgba(255, 141, 221, 0.45);
-    }
-
-    textarea.vertical-input {
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      line-height: 2;
-      letter-spacing: 0.04em;
-      overflow-x: auto;
-      overflow-y: hidden;
-      text-align: start;
-    }
-
-    textarea.horizontal-input {
-      writing-mode: horizontal-tb;
-      overflow-y: auto;
-      text-align: left;
-    }
-
-    textarea.over-limit {
-      border-color: #ff2f92;
-      background: rgba(255, 210, 232, 0.95);
-      box-shadow:
-        inset 0 0 12px rgba(255, 47, 146, 0.55),
-        0 0 18px rgba(255, 47, 146, 0.45);
-    }
-
-    .counter {
-      margin-top: 8px;
-      text-align: center;
-      font-size: 13px;
-      color: #9d2a72;
-      font-weight: bold;
-    }
-
-    .counter.over {
-      color: #d0006f;
-      text-shadow: 0 0 8px rgba(255, 47, 146, 0.45);
-    }
-
-    .small-button {
-      padding: 9px 14px;
-      font-size: 13px;
-      box-shadow:
-        0 4px 0 #d95aa9,
-        0 0 12px rgba(255,141,221,0.9);
-    }
-
-    .bottom-actions {
-      margin-top: 28px;
-    }
-
     @media (max-width: 700px) {
       .app {
-        width: 96vw;
-        padding: 24px 0 40px;
+        width: 94vw;
+        padding: 28px 0 40px;
       }
 
       .panel {
         padding: 18px;
       }
 
+      .choice-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .choice {
+        min-height: 170px;
+      }
+
       a.button,
-      button,
-      .upload-label {
+      button {
         width: 100%;
-      }
-
-      .choice-card {
-        width: 100%;
-      }
-
-      .preview-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .preview img {
-        height: 240px;
-      }
-
-      .image-actions {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .image-actions .card-button {
-        width: 100%;
-        font-size: 12px;
-      }
-
-      .columns-editor {
-        grid-template-columns: 1fr;
-      }
-
-      textarea {
-        height: 320px;
-        font-size: 14px;
       }
     }
   </style>
@@ -415,86 +197,35 @@
 
   <main class="app">
     <header>
-      <h1>Edit Book</h1>
-      <p id="subtitle" class="subtitle">読み込み中...</p>
+      <h1>Create Book</h1>
+      <p class="subtitle">作りたい本の種類を選んでください♡</p>
     </header>
 
     <section class="panel">
+      <p id="loginUser" class="hint"></p>
+
+      <div class="choice-grid">
+        <a class="choice" href="create-image.html">
+          <div class="choice-icon">🖼️</div>
+          <div class="choice-title">画像本</div>
+          <div class="choice-text">
+            画像を取り込んで<br />
+            本みたいにめくれます
+          </div>
+        </a>
+
+        <a class="choice" href="create-text.html">
+          <div class="choice-icon">✍️</div>
+          <div class="choice-title">文字本</div>
+          <div class="choice-text">
+            小説ログ用に<br />
+            縦書き・二段組で作れます
+          </div>
+        </a>
+      </div>
+
       <a class="button" href="bookshelf.html">← 本棚に戻る</a>
-
-      <div id="missingMessage" class="hint danger hidden">
-        本が見つかりませんでした。<br />
-        本棚からもう一度開いてください。
-      </div>
-
-      <div id="editorArea" class="hidden">
-        <p id="loginUser" class="hint"></p>
-
-        <div>
-          <input id="bookTitleInput" type="text" placeholder="本のタイトル" />
-        </div>
-
-        <div>
-          <input id="bookDateInput" type="text" placeholder="日付 例：2026.6.9 / 2026年6月9日" />
-        </div>
-
-        <p class="hint">開き方を選んでください。</p>
-
-        <div class="choice-box">
-          <div id="rtlButton" class="choice-card">右開き</div>
-          <div id="ltrButton" class="choice-card">左開き</div>
-        </div>
-
-        <div id="textOptions" class="hidden">
-          <p class="hint">フォントを選んでください。</p>
-
-          <div class="choice-box">
-            <div id="fontSerifButton" class="choice-card">明朝</div>
-            <div id="fontMaruButton" class="choice-card">丸ゴ</div>
-            <div id="fontDotButton" class="choice-card">ドット</div>
-          </div>
-
-          <p class="hint">文字サイズを選んでください。</p>
-
-          <div class="choice-box">
-            <div id="sizeSmallButton" class="choice-card">小</div>
-            <div id="sizeMediumButton" class="choice-card">中</div>
-            <div id="sizeLargeButton" class="choice-card">大</div>
-          </div>
-        </div>
-
-        <div id="imageEditor" class="hidden">
-          <h2 class="section-title">IMAGE PAGES</h2>
-
-          <label class="upload-label" for="imageInput">画像を追加する</label>
-          <input id="imageInput" type="file" accept="image/*" multiple />
-
-          <p class="hint">
-            画像ごとに圧縮・順番変更・削除ができます。<br />
-            最後に「変更を保存する」を押してください。
-          </p>
-
-          <div id="previewGrid" class="preview-grid"></div>
-        </div>
-
-        <div id="textEditor" class="hidden">
-          <h2 class="section-title">TEXT PAGES</h2>
-
-          <p class="hint">
-            500文字を超えても入力できます。<br />
-            超えた欄は赤くなり、保存時に止まります。
-          </p>
-
-          <div id="pageList" class="page-list"></div>
-
-          <button id="addPageButton" type="button">＋ ページを追加</button>
-        </div>
-
-        <div class="bottom-actions">
-          <button id="saveButton" type="button">変更を保存する</button>
-          <a id="openBookLink" class="button" href="#">この本を開く</a>
-        </div>
-      </div>
+      <button id="logoutButton" type="button">ログアウト</button>
     </section>
   </main>
 
@@ -503,618 +234,19 @@
   <script>
     const currentUser = requireLogin();
 
-    const params = new URLSearchParams(window.location.search);
-    const bookId = params.get("id");
-
-    const subtitle = document.getElementById("subtitle");
-    const missingMessage = document.getElementById("missingMessage");
-    const editorArea = document.getElementById("editorArea");
     const loginUser = document.getElementById("loginUser");
-
-    const bookTitleInput = document.getElementById("bookTitleInput");
-    const bookDateInput = document.getElementById("bookDateInput");
-
-    const rtlButton = document.getElementById("rtlButton");
-    const ltrButton = document.getElementById("ltrButton");
-
-    const textOptions = document.getElementById("textOptions");
-    const imageEditor = document.getElementById("imageEditor");
-    const textEditor = document.getElementById("textEditor");
-
-    const imageInput = document.getElementById("imageInput");
-    const previewGrid = document.getElementById("previewGrid");
-
-    const pageList = document.getElementById("pageList");
-    const addPageButton = document.getElementById("addPageButton");
-
-    const fontSerifButton = document.getElementById("fontSerifButton");
-    const fontMaruButton = document.getElementById("fontMaruButton");
-    const fontDotButton = document.getElementById("fontDotButton");
-
-    const sizeSmallButton = document.getElementById("sizeSmallButton");
-    const sizeMediumButton = document.getElementById("sizeMediumButton");
-    const sizeLargeButton = document.getElementById("sizeLargeButton");
-
-    const saveButton = document.getElementById("saveButton");
-    const openBookLink = document.getElementById("openBookLink");
-
-    let currentBook = null;
-    let direction = "rtl";
-    let novelFont = "serif";
-    let novelSize = "medium";
-    let images = [];
-    let compressionLevels = [];
-    let textPages = [];
+    const logoutButton = document.getElementById("logoutButton");
 
     if (currentUser) {
-      initEditor();
+      loginUser.textContent = "ログイン中：" + currentUser;
     }
 
-    async function initEditor() {
-      try {
-        currentBook = await getBookById(bookId);
+    logoutButton.addEventListener("click", () => {
+      const ok = confirm("ログアウトしますか？");
+      if (!ok) return;
 
-        if (!currentBook || currentBook.userName !== currentUser) {
-          showMissing();
-          return;
-        }
-
-        document.title = "Edit - " + currentBook.title;
-        subtitle.textContent = "作った本をあとから編集できます♡";
-        loginUser.textContent = "ログイン中：" + currentUser;
-
-        bookTitleInput.value = currentBook.title || "";
-        bookDateInput.value = currentBook.bookDate || currentBook.createdAt || "";
-
-        direction = currentBook.direction || "rtl";
-
-        images = currentBook.images ? [...currentBook.images] : [];
-        compressionLevels = currentBook.compressionLevels
-          ? [...currentBook.compressionLevels]
-          : images.map(() => 0);
-
-        textPages = normalizeTextPages(currentBook.textPages || []);
-
-        novelFont = currentBook.novelFont || "serif";
-        novelSize = currentBook.novelSize || "medium";
-
-        openBookLink.href = "book.html?id=" + currentBook.id;
-
-        updateDirectionButtons();
-
-        editorArea.classList.remove("hidden");
-
-        if (currentBook.type === "text") {
-          textOptions.classList.remove("hidden");
-          textEditor.classList.remove("hidden");
-          updateFontButtons();
-          updateSizeButtons();
-          renderTextPages();
-        } else {
-          imageEditor.classList.remove("hidden");
-          renderImages();
-        }
-      } catch (error) {
-        console.error(error);
-        showMissing();
-      }
-    }
-
-    function showMissing() {
-      subtitle.textContent = "";
-      missingMessage.classList.remove("hidden");
-      editorArea.classList.add("hidden");
-    }
-
-    rtlButton.addEventListener("click", () => {
-      direction = "rtl";
-      updateDirectionButtons();
-      if (currentBook && currentBook.type === "text") renderTextPages();
+      logoutUser();
     });
-
-    ltrButton.addEventListener("click", () => {
-      direction = "ltr";
-      updateDirectionButtons();
-      if (currentBook && currentBook.type === "text") renderTextPages();
-    });
-
-    fontSerifButton.addEventListener("click", () => {
-      novelFont = "serif";
-      updateFontButtons();
-      applyTextAreaStyle();
-    });
-
-    fontMaruButton.addEventListener("click", () => {
-      novelFont = "maru";
-      updateFontButtons();
-      applyTextAreaStyle();
-    });
-
-    fontDotButton.addEventListener("click", () => {
-      novelFont = "dot";
-      updateFontButtons();
-      applyTextAreaStyle();
-    });
-
-    sizeSmallButton.addEventListener("click", () => {
-      novelSize = "small";
-      updateSizeButtons();
-      applyTextAreaStyle();
-    });
-
-    sizeMediumButton.addEventListener("click", () => {
-      novelSize = "medium";
-      updateSizeButtons();
-      applyTextAreaStyle();
-    });
-
-    sizeLargeButton.addEventListener("click", () => {
-      novelSize = "large";
-      updateSizeButtons();
-      applyTextAreaStyle();
-    });
-
-    imageInput.addEventListener("change", async (event) => {
-      const files = Array.from(event.target.files);
-      if (files.length === 0) return;
-
-      try {
-        const addedImages = [];
-
-        for (const file of files) {
-          const image = await fileToDataUrl(file);
-          addedImages.push(image);
-        }
-
-        images = images.concat(addedImages);
-        compressionLevels = compressionLevels.concat(addedImages.map(() => 0));
-
-        imageInput.value = "";
-        renderImages();
-      } catch (error) {
-        console.error(error);
-        alert("画像の読み込みに失敗しました。別の画像で試してください。");
-      }
-    });
-
-    addPageButton.addEventListener("click", () => {
-      saveCurrentText();
-      textPages.push({ column1: "", column2: "" });
-      renderTextPages();
-    });
-
-    saveButton.addEventListener("click", async () => {
-      const title = bookTitleInput.value.trim();
-      const bookDate = bookDateInput.value.trim();
-
-      if (!currentBook) return;
-
-      if (!title) {
-        alert("本のタイトルを入れてください。");
-        return;
-      }
-
-      if (!bookDate) {
-        alert("日付を入れてください。");
-        return;
-      }
-
-      currentBook.title = title;
-      currentBook.bookDate = bookDate;
-      currentBook.direction = direction;
-      currentBook.updatedAt = new Date().toLocaleString("ja-JP");
-
-      if (currentBook.type === "image") {
-        if (images.length === 0) {
-          alert("画像ページが1枚もありません。");
-          return;
-        }
-
-        currentBook.images = images;
-        currentBook.compressionLevels = compressionLevels;
-        currentBook.textPages = [];
-      }
-
-      if (currentBook.type === "text") {
-        saveCurrentText();
-
-        const cleanedPages = textPages
-          .map((page) => ({
-            column1: page.column1.trim(),
-            column2: page.column2.trim()
-          }))
-          .filter((page) => page.column1.length > 0 || page.column2.length > 0);
-
-        if (cleanedPages.length === 0) {
-          alert("本文を書いてください。");
-          return;
-        }
-
-        const hasOverLimit = cleanedPages.some(page =>
-          page.column1.length > 500 || page.column2.length > 500
-        );
-
-        if (hasOverLimit) {
-          alert("500文字を超えている段があります。赤くなっている欄を500文字以内にしてください。");
-          return;
-        }
-
-        currentBook.textPages = cleanedPages;
-        currentBook.images = [];
-        currentBook.compressionLevels = [];
-        currentBook.novelFont = novelFont;
-        currentBook.novelSize = novelSize;
-      }
-
-      saveButton.disabled = true;
-      saveButton.textContent = "保存中...";
-
-      try {
-        await saveBookToDB(currentBook);
-
-        alert("変更を保存しました♡");
-        window.location.href = "bookshelf.html";
-      } catch (error) {
-        console.error(error);
-
-        alert(
-          "保存できませんでした。\n" +
-          "画像が大きすぎるか、枚数が多すぎる可能性があります。\n" +
-          "画像を減らすか、各画像の「もっと圧縮」を押してから保存してください。"
-        );
-
-        saveButton.disabled = false;
-        saveButton.textContent = "変更を保存する";
-      }
-    });
-
-    function renderImages() {
-      previewGrid.innerHTML = "";
-
-      if (images.length === 0) {
-        previewGrid.innerHTML = '<p class="hint">画像がありません。</p>';
-        return;
-      }
-
-      images.forEach((src, index) => {
-        const level = compressionLevels[index] || 0;
-
-        const item = document.createElement("div");
-        item.className = "preview";
-
-        item.innerHTML = `
-          <img src="${src}" alt="page ${index + 1}" />
-          <div class="preview-number">PAGE ${index + 1} / 圧縮 ${level}</div>
-
-          <div class="image-actions">
-            <button class="card-button" data-compress-light="${index}" type="button">軽く圧縮</button>
-            <button class="card-button" data-compress-strong="${index}" type="button">もっと圧縮</button>
-            <button class="card-button" data-up="${index}" type="button">前へ</button>
-            <button class="card-button" data-down="${index}" type="button">後ろへ</button>
-            <button class="card-button danger-button" data-delete-image="${index}" type="button">消す</button>
-          </div>
-        `;
-
-        previewGrid.appendChild(item);
-      });
-
-      document.querySelectorAll("[data-delete-image]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const index = Number(button.getAttribute("data-delete-image"));
-          const ok = confirm("この画像ページを消しますか？");
-          if (!ok) return;
-
-          images.splice(index, 1);
-          compressionLevels.splice(index, 1);
-          renderImages();
-        });
-      });
-
-      document.querySelectorAll("[data-up]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const index = Number(button.getAttribute("data-up"));
-          moveImage(index, index - 1);
-        });
-      });
-
-      document.querySelectorAll("[data-down]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const index = Number(button.getAttribute("data-down"));
-          moveImage(index, index + 1);
-        });
-      });
-
-      document.querySelectorAll("[data-compress-light]").forEach((button) => {
-        button.addEventListener("click", async () => {
-          const index = Number(button.getAttribute("data-compress-light"));
-          await compressOneImage(index, 1400, 0.72, button, "軽く圧縮");
-        });
-      });
-
-      document.querySelectorAll("[data-compress-strong]").forEach((button) => {
-        button.addEventListener("click", async () => {
-          const index = Number(button.getAttribute("data-compress-strong"));
-          await compressMoreAndMore(index, button);
-        });
-      });
-    }
-
-    async function compressOneImage(index, maxSize, quality, button, originalText) {
-      if (!images[index]) return;
-
-      button.disabled = true;
-      button.textContent = "圧縮中...";
-
-      try {
-        images[index] = await compressDataUrlImage(images[index], maxSize, quality);
-        compressionLevels[index] = (compressionLevels[index] || 0) + 1;
-        renderImages();
-      } catch (error) {
-        console.error(error);
-        alert("画像の圧縮に失敗しました。");
-        button.disabled = false;
-        button.textContent = originalText;
-      }
-    }
-
-    async function compressMoreAndMore(index, button) {
-      if (!images[index]) return;
-
-      const currentLevel = compressionLevels[index] || 0;
-      const nextLevel = currentLevel + 1;
-
-      const settings = [
-        { maxSize: 1000, quality: 0.62 },
-        { maxSize: 850, quality: 0.55 },
-        { maxSize: 700, quality: 0.48 },
-        { maxSize: 560, quality: 0.42 },
-        { maxSize: 450, quality: 0.36 },
-        { maxSize: 360, quality: 0.30 }
-      ];
-
-      const setting = settings[Math.min(nextLevel - 1, settings.length - 1)];
-
-      button.disabled = true;
-      button.textContent = "圧縮中...";
-
-      try {
-        images[index] = await compressDataUrlImage(
-          images[index],
-          setting.maxSize,
-          setting.quality
-        );
-
-        compressionLevels[index] = nextLevel;
-        renderImages();
-      } catch (error) {
-        console.error(error);
-        alert("画像の圧縮に失敗しました。");
-        button.disabled = false;
-        button.textContent = "もっと圧縮";
-      }
-    }
-
-    function moveImage(from, to) {
-      if (to < 0 || to >= images.length) return;
-
-      const item = images.splice(from, 1)[0];
-      const level = compressionLevels.splice(from, 1)[0];
-
-      images.splice(to, 0, item);
-      compressionLevels.splice(to, 0, level);
-
-      renderImages();
-    }
-
-    function renderTextPages() {
-      if (currentBook && currentBook.type !== "text") return;
-
-      saveCurrentText();
-
-      pageList.innerHTML = "";
-
-      textPages.forEach((pageData, index) => {
-        const page = document.createElement("div");
-        page.className = "page-editor";
-
-        const inputClass = direction === "rtl" ? "vertical-input" : "horizontal-input";
-
-        page.innerHTML = `
-          <div class="page-editor-header">
-            <div class="page-label">PAGE ${index + 1}</div>
-            <button class="small-button" data-delete-text="${index}" type="button">このページを消す</button>
-          </div>
-
-          <div class="columns-editor">
-            <div class="column-box">
-              <div class="column-label">1段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column1">${escapeHtml(pageData.column1)}</textarea>
-              <div class="counter" data-counter="${index}-column1">${pageData.column1.length} / 500</div>
-            </div>
-
-            <div class="column-box">
-              <div class="column-label">2段目 / 500文字</div>
-              <textarea class="${inputClass}" data-page="${index}" data-column="column2">${escapeHtml(pageData.column2)}</textarea>
-              <div class="counter" data-counter="${index}-column2">${pageData.column2.length} / 500</div>
-            </div>
-          </div>
-        `;
-
-        pageList.appendChild(page);
-      });
-
-      document.querySelectorAll("[data-delete-text]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const index = Number(button.getAttribute("data-delete-text"));
-
-          if (textPages.length === 1) {
-            alert("ページは最低1つ必要です。");
-            return;
-          }
-
-          saveCurrentText();
-          textPages.splice(index, 1);
-          renderTextPages();
-        });
-      });
-
-      document.querySelectorAll("textarea").forEach((textarea) => {
-        textarea.addEventListener("input", () => {
-          updateCounter(textarea);
-        });
-
-        updateCounter(textarea);
-      });
-
-      applyTextAreaStyle();
-    }
-
-    function updateCounter(textarea) {
-      const pageIndex = textarea.getAttribute("data-page");
-      const column = textarea.getAttribute("data-column");
-      const counter = document.querySelector(`[data-counter="${pageIndex}-${column}"]`);
-
-      if (!counter) return;
-
-      const count = textarea.value.length;
-      counter.textContent = count + " / 500";
-
-      const isOver = count > 500;
-
-      textarea.classList.toggle("over-limit", isOver);
-      counter.classList.toggle("over", isOver);
-    }
-
-    function saveCurrentText() {
-      document.querySelectorAll("textarea[data-page]").forEach((textarea) => {
-        const index = Number(textarea.getAttribute("data-page"));
-        const column = textarea.getAttribute("data-column");
-
-        if (!textPages[index]) {
-          textPages[index] = { column1: "", column2: "" };
-        }
-
-        textPages[index][column] = textarea.value;
-      });
-    }
-
-    function normalizeTextPages(rawPages) {
-      if (rawPages.length === 0) {
-        return [{ column1: "", column2: "" }];
-      }
-
-      if (typeof rawPages[0] === "object") {
-        return rawPages.map((page) => ({
-          column1: page.column1 || "",
-          column2: page.column2 || ""
-        }));
-      }
-
-      const joinedText = rawPages.join("\n\n");
-      const chunks = [];
-
-      for (let i = 0; i < joinedText.length; i += 500) {
-        chunks.push(joinedText.slice(i, i + 500));
-      }
-
-      const pages = [];
-
-      for (let i = 0; i < chunks.length; i += 2) {
-        pages.push({
-          column1: chunks[i] || "",
-          column2: chunks[i + 1] || ""
-        });
-      }
-
-      return pages.length ? pages : [{ column1: "", column2: "" }];
-    }
-
-    function updateDirectionButtons() {
-      rtlButton.classList.toggle("active", direction === "rtl");
-      ltrButton.classList.toggle("active", direction === "ltr");
-    }
-
-    function updateFontButtons() {
-      fontSerifButton.classList.toggle("active", novelFont === "serif");
-      fontMaruButton.classList.toggle("active", novelFont === "maru");
-      fontDotButton.classList.toggle("active", novelFont === "dot");
-    }
-
-    function updateSizeButtons() {
-      sizeSmallButton.classList.toggle("active", novelSize === "small");
-      sizeMediumButton.classList.toggle("active", novelSize === "medium");
-      sizeLargeButton.classList.toggle("active", novelSize === "large");
-    }
-
-    function applyTextAreaStyle() {
-      document.querySelectorAll("textarea").forEach((textarea) => {
-        textarea.style.fontFamily = getFontFamily(novelFont);
-        textarea.style.fontSize = getFontSize(novelSize);
-      });
-    }
-
-    function getFontFamily(font) {
-      if (font === "dot") return '"DotGothic16", sans-serif';
-      if (font === "maru") return '"Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif';
-      return '"Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif';
-    }
-
-    function getFontSize(size) {
-      if (size === "small") return "13px";
-      if (size === "large") return "16px";
-      return "14.5px";
-    }
-
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function compressDataUrlImage(dataUrl, maxSize = 1400, quality = 0.72) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height && width > maxSize) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          } else if (height >= width && height > maxSize) {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
-          }
-
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-          resolve(compressedDataUrl);
-        };
-
-        img.onerror = reject;
-        img.src = dataUrl;
-      });
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
   </script>
 </body>
 </html>
