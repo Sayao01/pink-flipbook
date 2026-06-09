@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export Book</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Kosugi+Maru&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DotGothic16", sans-serif;
+      background:
+        radial-gradient(circle at top left, #fff0fb, transparent 28%),
+        radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
+        linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
+      color: #7a1456;
+      overflow-x: hidden;
+    }
+
+    .sparkle {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle, rgba(255,255,255,0.7) 0 1px, transparent 2px);
+      background-size: 90px 90px, 50px 50px;
+      animation: glitter 8s linear infinite;
+      opacity: 0.65;
+      z-index: 0;
+    }
+
+    @keyframes glitter {
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1100px, 94vw);
+      margin: 0 auto;
+      padding: 36px 0 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
+
+    h1 {
+      font-size: clamp(34px, 7vw, 70px);
+      margin: 0;
+      color: #fff;
+      letter-spacing: 5px;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
+      word-break: break-word;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+    }
+
+    .panel {
+      margin: 24px auto;
+      padding: 28px;
+      border-radius: 32px;
+      border: 3px solid rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.46);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    a.button,
+    button {
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      margin: 8px;
+      padding: 13px 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #ff9bdf);
+      border: 2px solid #fff;
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .book-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .book-card {
+      min-height: 245px;
+      padding: 16px;
+      border-radius: 24px;
+      border: 3px solid #fff;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.86), rgba(255,182,230,0.76));
+      box-shadow:
+        0 10px 0 #d95aa9,
+        0 0 20px rgba(255,105,210,0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .cover {
+      height: 120px;
+      border-radius: 18px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.62);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+      font-size: 34px;
+      color: #d95aa9;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .book-title {
+      font-weight: bold;
+      color: #7a1456;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .meta {
+      color: #b13a86;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+
+    .empty {
+      padding: 36px 12px;
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.9;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        width: 94vw;
+        padding: 26px 0 40px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      a.button,
+      button {
+        width: 100%;
+      }
+
+      .book-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sparkle"></div>
+
+  <main class="app">
+    <header>
+      <h1>Export</h1>
+      <p class="subtitle">公開用HTMLを書き出します♡</p>
+    </header>
+
+    <section class="panel">
+      <a class="button" href="bookshelf.html">← 本棚に戻る</a>
+
+      <p id="loginUser" class="hint"></p>
+
+      <p class="hint">
+        公開したい本の「共有用HTMLを作る」を押すと、HTMLファイルがダウンロードされます。<br />
+        そのHTMLをGitHubにアップロードすると、URLで他の人に見せられます。
+      </p>
+
+      <div id="bookList" class="book-list"></div>
+
+      <div id="emptyMessage" class="empty">読み込み中...</div>
+    </section>
+  </main>
+
+  <script src="db.js"></script>
+
+  <script>
+    const currentUser = requireLogin();
+
+    const loginUser = document.getElementById("loginUser");
+    const bookList = document.getElementById("bookList");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    let books = [];
+
+    if (currentUser) {
+      loginUser.textContent = "ログイン中：" + currentUser;
+      loadBooks();
+    }
+
+    async function loadBooks() {
+      try {
+        books = await getBooksByUser(currentUser);
+        renderBooks();
+      } catch (error) {
+        console.error(error);
+        emptyMessage.textContent = "本の読み込みに失敗しました。";
+      }
+    }
+
+    function renderBooks() {
+      bookList.innerHTML = "";
+
+      if (books.length === 0) {
+        emptyMessage.style.display = "block";
+        emptyMessage.innerHTML = "まだ本がありません。<br />本棚から本を作ってください♡";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      books.forEach((book) => {
+        const isTextBook = book.type === "text";
+        const pageCount = isTextBook
+          ? (book.textPages ? book.textPages.length : 0)
+          : (book.images ? book.images.length : 0);
+
+        const cover = !isTextBook && book.images && book.images[0]
+          ? '<img src="' + book.images[0] + '" alt="cover" />'
+          : isTextBook
+            ? "✍️"
+            : "♡";
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        card.innerHTML = `
+          <div>
+            <div class="cover">${cover}</div>
+            <div class="book-title">${escapeHtml(book.title)}</div>
+            <div class="meta">${escapeHtml(book.bookDate || book.createdAt || "")}</div>
+            <div class="meta">${isTextBook ? "文字本" : "画像本"} / ${book.direction === "rtl" ? "右開き" : "左開き"}</div>
+            <div class="meta">${pageCount} pages</div>
+          </div>
+
+          <button type="button" data-export="${book.id}">共有用HTMLを作る</button>
+        `;
+
+        bookList.appendChild(card);
+      });
+
+      document.querySelectorAll("[data-export]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.getAttribute("data-export");
+          const book = books.find((item) => item.id === id);
+
+          if (!book) {
+            alert("本が見つかりませんでした。");
+            return;
+          }
+
+          exportBook(book);
+        });
+      });
+    }
+
+    function exportBook(book) {
+      const html = createPublicHtml(book);
+      const fileName = "public-book-" + sanitizeFileName(book.title) + "-" + book.id + ".html";
+
+      const blob = new Blob([html], {
+        type: "text/html"
+      });
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(url);
+
+      alert(
+        "共有用HTMLを書き出しました♡\\n\\n" +
+        fileName + "\\n\\n" +
+        "このファイルをGitHubにアップロードすると、URLで共有できます。"
+      );
+    }
+
+    function createPublicHtml(book) {
+      const safeBookJson = JSON.stringify(book).replaceAll("</script", "<\\/script");
+
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(book.title)}</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Kosugi+Maru&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DotGothic16", sans-serif;
+      background:
+        radial-gradient(circle at top left, #fff0fb, transparent 28%),
+        radial-gradient(circle at bottom right, #ff8bdd, transparent 30%),
+        linear-gradient(135deg, #ffb6e6, #ffd6f6, #ffeafc);
+      color: #7a1456;
+      overflow-x: hidden;
+    }
+
+    .sparkle {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle, rgba(255,255,255,0.7) 0 1px, transparent 2px);
+      background-size: 90px 90px, 50px 50px;
+      animation: glitter 8s linear infinite;
+      opacity: 0.65;
+      z-index: 0;
+    }
+
+    @keyframes glitter {
+      from { transform: translateY(0); }
+      to { transform: translateY(-80px); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1380px, 98vw);
+      margin: 0 auto;
+      padding: 24px 0 46px;
+    }
+
+    header {
+      text-align: center;
+      padding: 12px 10px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 58px);
+      margin: 0;
+      color: #fff;
+      letter-spacing: 5px;
+      text-shadow:
+        0 4px 0 #d95aa9,
+        0 0 18px #ff4fc3,
+        0 0 36px #fff;
+      word-break: break-word;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: #8c1d63;
+      font-weight: bold;
+      line-height: 1.7;
+    }
+
+    .panel {
+      margin: 14px auto;
+      padding: 18px;
+      border-radius: 32px;
+      border: 3px solid rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.46);
+      box-shadow:
+        0 0 30px rgba(255,105,210,0.45),
+        inset 0 0 18px rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    button {
+      display: inline-block;
+      cursor: pointer;
+      margin: 8px;
+      padding: 13px 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #ff9bdf);
+      border: 2px solid #fff;
+      box-shadow:
+        0 6px 0 #d95aa9,
+        0 0 18px rgba(255,141,221,0.9);
+      color: #7a1456;
+      font-family: "DotGothic16", sans-serif;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .book-area {
+      width: 100%;
+      margin: 12px auto 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible;
+      touch-action: pan-y;
+    }
+
+    #bookShell {
+      margin: 0 auto;
+      filter: drop-shadow(0 26px 28px rgba(122,20,86,0.35));
+    }
+
+    #flipbook {
+      margin: 0 auto;
+      cursor: grab;
+    }
+
+    .page {
+      background: #fffaf7;
+      border: 1px solid #efd9e8;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .page-content {
+      width: 100%;
+      height: 100%;
+      padding: 18px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.98), rgba(255,252,249,1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .page-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(122,20,86,0.20);
+      background: white;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .novel-page {
+      align-items: stretch;
+      justify-content: center;
+      padding: 34px;
+      color: #3f2a36;
+      overflow: hidden;
+      background: linear-gradient(90deg, #fffdf9, #fffaf7);
+    }
+
+    .novel-columns {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .novel-column {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      white-space: pre-wrap;
+      color: #3f2a36;
+      user-select: none;
+      -webkit-user-select: none;
+      padding: 4px 10px;
+    }
+
+    .vertical-columns .novel-column {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+      text-align: start;
+    }
+
+    .horizontal-columns .novel-column {
+      writing-mode: horizontal-tb;
+      line-height: 1.65;
+      text-align: left;
+    }
+
+    .font-dot { font-family: "DotGothic16", sans-serif; }
+    .font-serif { font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "MS Mincho", serif; }
+    .font-maru { font-family: "Kosugi Maru", "Hiragino Maru Gothic ProN", sans-serif; }
+
+    .size-small { font-size: 9.2px; }
+    .size-medium { font-size: 10.2px; }
+    .size-large { font-size: 11.2px; }
+
+    .page-number {
+      position: absolute;
+      bottom: 12px;
+      right: 18px;
+      font-size: 12px;
+      color: #a86a8d;
+      background: rgba(255,255,255,0.75);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    .cover-page .page-content {
+      background:
+        radial-gradient(circle at top left, #fff, transparent 28%),
+        linear-gradient(135deg, #ff8ddd, #fff0fb, #ffc7ed);
+      color: #7a1456;
+      text-align: center;
+      flex-direction: column;
+      padding: 26px;
+    }
+
+    .cover-title {
+      font-size: 34px;
+      color: #fff;
+      text-shadow:
+        0 3px 0 #d95aa9,
+        0 0 18px #ff4fc3;
+      letter-spacing: 3px;
+      line-height: 1.5;
+      word-break: break-word;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-date {
+      margin-top: 18px;
+      color: #8c1d63;
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    .blank {
+      color: #d678b7;
+      font-weight: bold;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    .controls {
+      margin-top: 18px;
+    }
+
+    .hint {
+      color: #9d2a72;
+      font-weight: bold;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        width: 100vw;
+        padding: 18px 0 36px;
+      }
+
+      header {
+        padding: 16px 12px;
+      }
+
+      h1 {
+        font-size: 34px;
+        letter-spacing: 3px;
+      }
+
+      .panel {
+        width: 94vw;
+        margin: 14px auto;
+        padding: 14px;
+        border-radius: 24px;
+      }
+
+      button {
+        width: 100%;
+        padding: 11px 18px;
+        font-size: 13px;
+      }
+
+      .cover-title {
+        font-size: 28px;
+      }
+
+      .cover-date {
+        font-size: 15px;
+      }
+
+      .novel-page {
+        padding: 24px 18px;
+      }
+
+      .novel-columns {
+        gap: 14px;
+      }
+
+      .size-small { font-size: 8px; }
+      .size-medium { font-size: 8.8px; }
+      .size-large { font-size: 9.6px; }
+
+      .vertical-columns .novel-column,
+      .horizontal-columns .novel-column {
+        line-height: 1.45;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sparkle"></div>
+
+  <main class="app">
+    <header>
+      <h1 id="bookTitle">Book</h1>
+      <p class="subtitle">Shared Pink Flipbook</p>
+    </header>
+
+    <section class="panel">
+      <div class="book-area">
+        <div id="bookShell">
+          <div id="flipbook"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="prevButton" type="button">前のページ</button>
+        <button id="nextButton" type="button">次のページ</button>
+      </div>
+
+      <p id="pageInfo" class="hint"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"><\/script>
+
+  <script>
+    const currentBook = ${safeBookJson};
+
+    const bookTitle = document.getElementById("bookTitle");
+    const flipbookElement = document.getElementById("flipbook");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+    const pageInfo = document.getElementById("pageInfo");
+
+    let pageFlip = null;
+    let totalPages = 0;
+    let isRightOpening = false;
+
+    bookTitle.textContent = currentBook.title || "Book";
+    document.title = currentBook.title || "Book";
+
+    createFlipbook();
+
+    function createFlipbook() {
+      const isTextBook = currentBook.type === "text";
+      isRightOpening = currentBook.direction === "rtl";
+
+      let pages = [];
+
+      const displayDate = currentBook.bookDate || currentBook.createdAt || "";
+
+      pages.push(\`
+        <div class="page cover-page">
+          <div class="page-content">
+            <div class="cover-title">\${escapeHtml(currentBook.title || "")}</div>
+            <div class="cover-date">\${escapeHtml(displayDate)}</div>
+          </div>
+        </div>
+      \`);
+
+      if (isTextBook) {
+        pages = pages.concat(createNovelPages());
+      } else {
+        const images = currentBook.images || [];
+
+        images.forEach((src, index) => {
+          pages.push(\`
+            <div class="page">
+              <div class="page-content">
+                <img src="\${src}" alt="page \${index + 1}" />
+                <div class="page-number">\${index + 1}</div>
+              </div>
+            </div>
+          \`);
+        });
+      }
+
+      if (pages.length % 2 !== 0) {
+        pages.push(\`
+          <div class="page">
+            <div class="page-content">
+              <div class="blank">Blank page ♡</div>
+            </div>
+          </div>
+        \`);
+      }
+
+      if (isRightOpening) {
+        pages = pages.reverse();
+      }
+
+      totalPages = pages.length;
+      flipbookElement.innerHTML = pages.join("");
+
+      const isText = currentBook.type === "text";
+      const isMobile = window.innerWidth <= 700;
+
+      pageFlip = new St.PageFlip(flipbookElement, {
+        width: isText ? (isMobile ? 330 : 560) : (isMobile ? 320 : 430),
+        height: isText ? (isMobile ? 480 : 760) : (isMobile ? 455 : 610),
+
+        size: "stretch",
+
+        minWidth: isMobile ? 280 : 320,
+        maxWidth: isText ? (isMobile ? 350 : 660) : (isMobile ? 340 : 520),
+
+        minHeight: isMobile ? 390 : 360,
+        maxHeight: isText ? (isMobile ? 500 : 860) : (isMobile ? 480 : 720),
+
+        showCover: true,
+        usePortrait: isMobile,
+        swipeDistance: 8,
+        mobileScrollSupport: false,
+        useMouseEvents: true,
+        clickEventForward: true,
+        drawShadow: true,
+        maxShadowOpacity: 0.8,
+        flippingTime: 850,
+        startZIndex: 10,
+        startPage: isRightOpening ? totalPages - 1 : 0
+      });
+
+      pageFlip.loadFromHTML(document.querySelectorAll(".page"));
+
+      if (isRightOpening) {
+        setTimeout(() => {
+          pageFlip.turnToPage(totalPages - 1);
+          updateInfo();
+        }, 50);
+      }
+
+      pageFlip.on("flip", () => {
+        updateInfo();
+      });
+
+      updateInfo();
+    }
+
+    function createNovelPages() {
+      const rawPages = currentBook.textPages || [];
+      const normalizedPages = normalizeTextPages(rawPages);
+
+      const fontClass = getFontClass(currentBook.novelFont);
+      const sizeClass = getSizeClass(currentBook.novelSize);
+      const columnDirectionClass = isRightOpening ? "vertical-columns" : "horizontal-columns";
+
+      return normalizedPages.map((page, index) => {
+        return \`
+          <div class="page">
+            <div class="page-content novel-page">
+              <div class="novel-columns \${columnDirectionClass}">
+                <div class="novel-column \${fontClass} \${sizeClass}">\${escapeHtml(page.column1 || "")}</div>
+                <div class="novel-column \${fontClass} \${sizeClass}">\${escapeHtml(page.column2 || "")}</div>
+              </div>
+              <div class="page-number">\${index + 1}</div>
+            </div>
+          </div>
+        \`;
+      });
+    }
+
+    function normalizeTextPages(rawPages) {
+      if (rawPages.length === 0) return [];
+
+      if (typeof rawPages[0] === "object") {
+        return rawPages.map(page => ({
+          column1: page.column1 || "",
+          column2: page.column2 || ""
+        }));
+      }
+
+      const joinedText = rawPages.join("\\n\\n");
+      const chunks = [];
+
+      for (let i = 0; i < joinedText.length; i += 500) {
+        chunks.push(joinedText.slice(i, i + 500));
+      }
+
+      const pages = [];
+
+      for (let i = 0; i < chunks.length; i += 2) {
+        pages.push({
+          column1: chunks[i] || "",
+          column2: chunks[i + 1] || ""
+        });
+      }
+
+      return pages;
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (!pageFlip) return;
+
+      if (isRightOpening) {
+        pageFlip.flipPrev();
+      } else {
+        pageFlip.flipNext();
+      }
+
+      setTimeout(updateInfo, 300);
+    });
+
+    prevButton.addEventListener("click", () => {
+      if (!pageFlip) return;
+
+      if (isRightOpening) {
+        pageFlip.flipNext();
+      } else {
+        pageFlip.flipPrev();
+      }
+
+      setTimeout(updateInfo, 300);
+    });
+
+    function updateInfo() {
+      if (!pageFlip) return;
+
+      const physicalPage = pageFlip.getCurrentPageIndex();
+      const total = pageFlip.getPageCount();
+
+      let logicalPage;
+
+      if (isRightOpening) {
+        logicalPage = total - physicalPage;
+      } else {
+        logicalPage = physicalPage + 1;
+      }
+
+      pageInfo.textContent = logicalPage + " / " + total + " pages";
+
+      if (isRightOpening) {
+        nextButton.disabled = physicalPage === 0;
+        prevButton.disabled = physicalPage >= total - 1;
+      } else {
+        prevButton.disabled = physicalPage === 0;
+        nextButton.disabled = physicalPage >= total - 1;
+      }
+    }
+
+    function getFontClass(font) {
+      if (font === "dot") return "font-dot";
+      if (font === "maru") return "font-maru";
+      return "font-serif";
+    }
+
+    function getSizeClass(size) {
+      if (size === "small") return "size-small";
+      if (size === "large") return "size-large";
+      return "size-medium";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function sanitizeFileName(text) {
+      return String(text)
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, "-")
+        .slice(0, 40) || "book";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
