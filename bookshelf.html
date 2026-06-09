@@ -8,9 +8,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -132,6 +130,14 @@
       line-height: 1.7;
     }
 
+    .login-user {
+      text-align: center;
+      color: #8c1d63;
+      font-weight: bold;
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+
     .bookshelf {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -140,7 +146,7 @@
     }
 
     .book-card {
-      min-height: 230px;
+      min-height: 235px;
       padding: 18px;
       border-radius: 24px;
       border: 3px solid #fff;
@@ -187,6 +193,7 @@
       font-size: 13px;
       color: #b13a86;
       margin-top: 6px;
+      line-height: 1.5;
     }
 
     .book-actions {
@@ -252,7 +259,7 @@
       }
 
       .book-card {
-        min-height: 215px;
+        min-height: 220px;
         padding: 12px;
         border-radius: 20px;
       }
@@ -291,15 +298,16 @@
   <main class="app">
     <header>
       <h1 id="mainTitle">MY BOOKSHELF</h1>
-      <p class="subtitle">♡自分のおきにいりのお話を本棚管理♡</p>
+      <p class="subtitle">画像本・文字本をストックできるY2K本棚</p>
     </header>
 
     <section class="panel">
+      <p id="loginUser" class="login-user"></p>
+
       <div class="top-actions">
         <a class="button" href="create.html">＋ 新しい本を作る</a>
-        <a class="button" href="index.html">入口に戻る</a>
         <button id="renameShelfButton" type="button">本棚名を変える</button>
-        <button id="clearAllButton" type="button">本棚を全部消す</button>
+        <button id="logoutButton" type="button">ログアウト</button>
       </div>
 
       <h2 id="bookshelfTitle" class="bookshelf-title">MY BOOKSHELF</h2>
@@ -308,28 +316,47 @@
       <div id="bookshelf" class="bookshelf"></div>
 
       <div id="emptyShelf" class="empty-shelf">
-        まだ本がありません。<br />
-        「＋ 新しい本を作る」から追加できます♡
+        読み込み中...
       </div>
     </section>
   </main>
 
+  <script src="db.js"></script>
+
   <script>
+    const currentUser = requireLogin();
+
     const mainTitle = document.getElementById("mainTitle");
     const bookshelfTitle = document.getElementById("bookshelfTitle");
     const bookshelf = document.getElementById("bookshelf");
     const emptyShelf = document.getElementById("emptyShelf");
-    const clearAllButton = document.getElementById("clearAllButton");
     const renameShelfButton = document.getElementById("renameShelfButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const loginUser = document.getElementById("loginUser");
 
-    let books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
-    let shelfName = localStorage.getItem("pinkFlipbookShelfName") || "MY BOOKSHELF";
+    let books = [];
 
-    setShelfTitle(shelfName);
-    renderBookshelf();
+    if (currentUser) {
+      initBookshelf();
+    }
+
+    async function initBookshelf() {
+      loginUser.textContent = "ログイン中：" + currentUser;
+
+      let shelfName = getShelfName(currentUser);
+
+      if (!shelfName) {
+        shelfName = currentUser + "の本棚";
+        saveShelfName(currentUser, shelfName);
+      }
+
+      setShelfTitle(shelfName);
+      await loadBooks();
+    }
 
     renameShelfButton.addEventListener("click", () => {
-      const newName = prompt("新しい本棚名を入れてください。", shelfName);
+      const oldName = getShelfName(currentUser) || currentUser + "の本棚";
+      const newName = prompt("新しい本棚名を入れてください。", oldName);
 
       if (newName === null) return;
 
@@ -340,19 +367,27 @@
         return;
       }
 
-      shelfName = trimmed;
-      localStorage.setItem("pinkFlipbookShelfName", shelfName);
-      setShelfTitle(shelfName);
+      saveShelfName(currentUser, trimmed);
+      setShelfTitle(trimmed);
     });
 
-    clearAllButton.addEventListener("click", () => {
-      const ok = confirm("本棚を全部消しますか？");
+    logoutButton.addEventListener("click", () => {
+      const ok = confirm("ログアウトしますか？");
       if (!ok) return;
 
-      books = [];
-      localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
-      renderBookshelf();
+      logoutUser();
     });
+
+    async function loadBooks() {
+      try {
+        books = await getBooksByUser(currentUser);
+        renderBookshelf();
+      } catch (error) {
+        console.error(error);
+        emptyShelf.style.display = "block";
+        emptyShelf.textContent = "本棚の読み込みに失敗しました。";
+      }
+    }
 
     function setShelfTitle(name) {
       mainTitle.textContent = name;
@@ -365,6 +400,10 @@
 
       if (books.length === 0) {
         emptyShelf.style.display = "block";
+        emptyShelf.innerHTML = `
+          まだ本がありません。<br />
+          「＋ 新しい本を作る」から追加できます♡
+        `;
         return;
       }
 
@@ -388,6 +427,7 @@
 
         const typeLabel = isTextBook ? "文字本" : "画像本";
         const directionLabel = book.direction === "rtl" ? "右開き" : "左開き";
+        const dateLabel = book.bookDate || book.createdAt || "";
 
         let novelInfo = "";
 
@@ -401,10 +441,10 @@
           <div>
             <div class="book-cover">${coverImage}</div>
             <div class="book-title">${escapeHtml(book.title)}</div>
+            <div class="book-meta">${escapeHtml(dateLabel)}</div>
             <div class="book-meta">${typeLabel} / ${directionLabel}</div>
             ${novelInfo}
             <div class="book-meta">${pageCount} pages</div>
-            <div class="book-meta">${book.createdAt}</div>
           </div>
 
           <div class="book-actions">
@@ -418,14 +458,18 @@
       });
 
       document.querySelectorAll("[data-delete]").forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", async () => {
           const id = button.getAttribute("data-delete");
           const ok = confirm("この本を消しますか？");
           if (!ok) return;
 
-          books = books.filter((book) => book.id !== id);
-          localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
-          renderBookshelf();
+          try {
+            await deleteBookFromDB(id);
+            await loadBooks();
+          } catch (error) {
+            console.error(error);
+            alert("削除に失敗しました。");
+          }
         });
       });
     }
