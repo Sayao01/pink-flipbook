@@ -179,38 +179,65 @@
 
     .preview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-      gap: 16px;
-      margin-top: 22px;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 18px;
+      margin-top: 24px;
     }
 
     .preview {
-      min-height: 225px;
-      border-radius: 20px;
-      border: 2px solid #fff;
-      background: rgba(255,255,255,0.55);
+      border-radius: 24px;
+      border: 3px solid #fff;
+      background: rgba(255,255,255,0.62);
       overflow: hidden;
-      box-shadow: 0 8px 18px rgba(122,20,86,0.18);
-      padding-bottom: 12px;
+      box-shadow:
+        0 8px 0 #d95aa9,
+        0 0 18px rgba(122,20,86,0.18);
+      padding: 12px;
       text-align: center;
     }
 
     .preview img {
       width: 100%;
-      height: 140px;
-      object-fit: cover;
+      height: 190px;
+      object-fit: contain;
       display: block;
+      background: rgba(255,255,255,0.8);
+      border-radius: 16px;
+      border: 2px solid #fff;
     }
 
     .preview-number {
       display: inline-block;
-      margin-top: 8px;
-      background: rgba(255,255,255,0.82);
+      margin: 10px 0 8px;
+      background: rgba(255,255,255,0.85);
       color: #b13a86;
       border-radius: 999px;
-      padding: 2px 8px;
+      padding: 4px 10px;
       font-size: 12px;
       font-weight: bold;
+    }
+
+    .image-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .image-actions .card-button {
+      width: 100%;
+      margin: 0;
+      padding: 9px 6px;
+      border-radius: 14px;
+      font-size: 12px;
+      box-shadow:
+        0 3px 0 #d95aa9,
+        0 0 10px rgba(255,141,221,0.9);
+    }
+
+    .image-actions .danger-button {
+      grid-column: 1 / -1;
+      background: linear-gradient(180deg, #ffffff, #ff7bbb);
     }
 
     .page-list {
@@ -323,8 +350,8 @@
     }
 
     .small-button {
-      padding: 8px 11px;
-      font-size: 12px;
+      padding: 9px 14px;
+      font-size: 13px;
       box-shadow:
         0 4px 0 #d95aa9,
         0 0 12px rgba(255,141,221,0.9);
@@ -354,6 +381,23 @@
         width: 100%;
       }
 
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview img {
+        height: 240px;
+      }
+
+      .image-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .image-actions .card-button {
+        width: 100%;
+        font-size: 12px;
+      }
+
       .columns-editor {
         grid-template-columns: 1fr;
       }
@@ -361,18 +405,6 @@
       textarea {
         height: 320px;
         font-size: 14px;
-      }
-
-      .preview-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .preview img {
-        height: 120px;
-      }
-
-      .small-button {
-        width: auto;
       }
     }
   </style>
@@ -384,7 +416,7 @@
   <main class="app">
     <header>
       <h1>Edit Book</h1>
-      <p class="subtitle">作った本をあとから編集できます♡</p>
+      <p id="subtitle" class="subtitle">読み込み中...</p>
     </header>
 
     <section class="panel">
@@ -395,7 +427,9 @@
         本棚からもう一度開いてください。
       </div>
 
-      <div id="editorArea">
+      <div id="editorArea" class="hidden">
+        <p id="loginUser" class="hint"></p>
+
         <div>
           <input id="bookTitleInput" type="text" placeholder="本のタイトル" />
         </div>
@@ -435,11 +469,9 @@
           <label class="upload-label" for="imageInput">画像を追加する</label>
           <input id="imageInput" type="file" accept="image/*" multiple />
 
-          <button id="compressImagesButton" type="button">画像をちょっと圧縮する</button>
-
           <p class="hint">
-            画像は「前へ」「後ろへ」で順番を変えられます。<br />
-            圧縮した後は、必ず「変更を保存する」を押してください。
+            画像ごとに圧縮・順番変更・削除ができます。<br />
+            最後に「変更を保存する」を押してください。
           </p>
 
           <div id="previewGrid" class="preview-grid"></div>
@@ -466,12 +498,18 @@
     </section>
   </main>
 
+  <script src="db.js"></script>
+
   <script>
+    const currentUser = requireLogin();
+
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
 
+    const subtitle = document.getElementById("subtitle");
     const missingMessage = document.getElementById("missingMessage");
     const editorArea = document.getElementById("editorArea");
+    const loginUser = document.getElementById("loginUser");
 
     const bookTitleInput = document.getElementById("bookTitleInput");
     const bookDateInput = document.getElementById("bookDateInput");
@@ -485,7 +523,6 @@
 
     const imageInput = document.getElementById("imageInput");
     const previewGrid = document.getElementById("previewGrid");
-    const compressImagesButton = document.getElementById("compressImagesButton");
 
     const pageList = document.getElementById("pageList");
     const addPageButton = document.getElementById("addPageButton");
@@ -501,51 +538,72 @@
     const saveButton = document.getElementById("saveButton");
     const openBookLink = document.getElementById("openBookLink");
 
-    let books = JSON.parse(localStorage.getItem("pinkFlipbookBooks")) || [];
-    let bookIndex = books.findIndex((book) => book.id === bookId);
-    let currentBook = books[bookIndex];
-
+    let currentBook = null;
     let direction = "rtl";
     let novelFont = "serif";
     let novelSize = "medium";
     let images = [];
+    let compressionLevels = [];
     let textPages = [];
 
-    if (!currentBook) {
-      missingMessage.classList.remove("hidden");
-      editorArea.classList.add("hidden");
-    } else {
+    if (currentUser) {
       initEditor();
     }
 
-    function initEditor() {
-      document.title = "Edit - " + currentBook.title;
+    async function initEditor() {
+      try {
+        currentBook = await getBookById(bookId);
 
-      bookTitleInput.value = currentBook.title || "";
-      bookDateInput.value = currentBook.bookDate || currentBook.createdAt || "";
+        if (!currentBook || currentBook.userName !== currentUser) {
+          showMissing();
+          return;
+        }
 
-      direction = currentBook.direction || "rtl";
+        document.title = "Edit - " + currentBook.title;
+        subtitle.textContent = "作った本をあとから編集できます♡";
+        loginUser.textContent = "ログイン中：" + currentUser;
 
-      images = currentBook.images ? [...currentBook.images] : [];
-      textPages = normalizeTextPages(currentBook.textPages || []);
+        bookTitleInput.value = currentBook.title || "";
+        bookDateInput.value = currentBook.bookDate || currentBook.createdAt || "";
 
-      novelFont = currentBook.novelFont || "serif";
-      novelSize = currentBook.novelSize || "medium";
+        direction = currentBook.direction || "rtl";
 
-      openBookLink.href = "book.html?id=" + currentBook.id;
+        images = currentBook.images ? [...currentBook.images] : [];
+        compressionLevels = currentBook.compressionLevels
+          ? [...currentBook.compressionLevels]
+          : images.map(() => 0);
 
-      updateDirectionButtons();
+        textPages = normalizeTextPages(currentBook.textPages || []);
 
-      if (currentBook.type === "text") {
-        textOptions.classList.remove("hidden");
-        textEditor.classList.remove("hidden");
-        updateFontButtons();
-        updateSizeButtons();
-        renderTextPages();
-      } else {
-        imageEditor.classList.remove("hidden");
-        renderImages();
+        novelFont = currentBook.novelFont || "serif";
+        novelSize = currentBook.novelSize || "medium";
+
+        openBookLink.href = "book.html?id=" + currentBook.id;
+
+        updateDirectionButtons();
+
+        editorArea.classList.remove("hidden");
+
+        if (currentBook.type === "text") {
+          textOptions.classList.remove("hidden");
+          textEditor.classList.remove("hidden");
+          updateFontButtons();
+          updateSizeButtons();
+          renderTextPages();
+        } else {
+          imageEditor.classList.remove("hidden");
+          renderImages();
+        }
+      } catch (error) {
+        console.error(error);
+        showMissing();
       }
+    }
+
+    function showMissing() {
+      subtitle.textContent = "";
+      missingMessage.classList.remove("hidden");
+      editorArea.classList.add("hidden");
     }
 
     rtlButton.addEventListener("click", () => {
@@ -598,18 +656,19 @@
 
     imageInput.addEventListener("change", async (event) => {
       const files = Array.from(event.target.files);
-
       if (files.length === 0) return;
 
       try {
         const addedImages = [];
 
         for (const file of files) {
-          const compressedImage = await compressFileImage(file, 1400, 0.72);
-          addedImages.push(compressedImage);
+          const image = await fileToDataUrl(file);
+          addedImages.push(image);
         }
 
         images = images.concat(addedImages);
+        compressionLevels = compressionLevels.concat(addedImages.map(() => 0));
+
         imageInput.value = "";
         renderImages();
       } catch (error) {
@@ -618,55 +677,17 @@
       }
     });
 
-    compressImagesButton.addEventListener("click", async () => {
-      if (!currentBook || currentBook.type !== "image") return;
-
-      if (images.length === 0) {
-        alert("圧縮する画像がありません。");
-        return;
-      }
-
-      const ok = confirm(
-        "今ある画像を少し軽くします。\n" +
-        "画質は少しだけ落ちますが、保存しやすくなります。\n\n" +
-        "実行しますか？"
-      );
-
-      if (!ok) return;
-
-      compressImagesButton.disabled = true;
-      compressImagesButton.textContent = "圧縮中...";
-
-      try {
-        const compressedImages = [];
-
-        for (const image of images) {
-          const compressed = await compressDataUrlImage(image, 1200, 0.68);
-          compressedImages.push(compressed);
-        }
-
-        images = compressedImages;
-        renderImages();
-
-        alert("画像を少し軽くしました♡\n最後に「変更を保存する」を押してください。");
-      } catch (error) {
-        console.error(error);
-        alert("画像の圧縮に失敗しました。別の画像で試してください。");
-      }
-
-      compressImagesButton.disabled = false;
-      compressImagesButton.textContent = "画像をちょっと圧縮する";
-    });
-
     addPageButton.addEventListener("click", () => {
       saveCurrentText();
       textPages.push({ column1: "", column2: "" });
       renderTextPages();
     });
 
-    saveButton.addEventListener("click", () => {
+    saveButton.addEventListener("click", async () => {
       const title = bookTitleInput.value.trim();
       const bookDate = bookDateInput.value.trim();
+
+      if (!currentBook) return;
 
       if (!title) {
         alert("本のタイトルを入れてください。");
@@ -690,6 +711,7 @@
         }
 
         currentBook.images = images;
+        currentBook.compressionLevels = compressionLevels;
         currentBook.textPages = [];
       }
 
@@ -719,6 +741,7 @@
 
         currentBook.textPages = cleanedPages;
         currentBook.images = [];
+        currentBook.compressionLevels = [];
         currentBook.novelFont = novelFont;
         currentBook.novelSize = novelSize;
       }
@@ -727,8 +750,7 @@
       saveButton.textContent = "保存中...";
 
       try {
-        books[bookIndex] = currentBook;
-        localStorage.setItem("pinkFlipbookBooks", JSON.stringify(books));
+        await saveBookToDB(currentBook);
 
         alert("変更を保存しました♡");
         window.location.href = "bookshelf.html";
@@ -737,8 +759,8 @@
 
         alert(
           "保存できませんでした。\n" +
-          "画像がまだ大きいか、枚数が多すぎる可能性があります。\n" +
-          "画像を減らすか、「画像をちょっと圧縮する」を押してから保存してください。"
+          "画像が大きすぎるか、枚数が多すぎる可能性があります。\n" +
+          "画像を減らすか、各画像の「もっと圧縮」を押してから保存してください。"
         );
 
         saveButton.disabled = false;
@@ -755,16 +777,21 @@
       }
 
       images.forEach((src, index) => {
+        const level = compressionLevels[index] || 0;
+
         const item = document.createElement("div");
         item.className = "preview";
 
         item.innerHTML = `
           <img src="${src}" alt="page ${index + 1}" />
-          <div class="preview-number">PAGE ${index + 1}</div>
-          <div>
-            <button class="small-button" data-up="${index}" type="button">前へ</button>
-            <button class="small-button" data-down="${index}" type="button">後ろへ</button>
-            <button class="small-button" data-delete-image="${index}" type="button">消す</button>
+          <div class="preview-number">PAGE ${index + 1} / 圧縮 ${level}</div>
+
+          <div class="image-actions">
+            <button class="card-button" data-compress-light="${index}" type="button">軽く圧縮</button>
+            <button class="card-button" data-compress-strong="${index}" type="button">もっと圧縮</button>
+            <button class="card-button" data-up="${index}" type="button">前へ</button>
+            <button class="card-button" data-down="${index}" type="button">後ろへ</button>
+            <button class="card-button danger-button" data-delete-image="${index}" type="button">消す</button>
           </div>
         `;
 
@@ -778,6 +805,7 @@
           if (!ok) return;
 
           images.splice(index, 1);
+          compressionLevels.splice(index, 1);
           renderImages();
         });
       });
@@ -795,13 +823,86 @@
           moveImage(index, index + 1);
         });
       });
+
+      document.querySelectorAll("[data-compress-light]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const index = Number(button.getAttribute("data-compress-light"));
+          await compressOneImage(index, 1400, 0.72, button, "軽く圧縮");
+        });
+      });
+
+      document.querySelectorAll("[data-compress-strong]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const index = Number(button.getAttribute("data-compress-strong"));
+          await compressMoreAndMore(index, button);
+        });
+      });
+    }
+
+    async function compressOneImage(index, maxSize, quality, button, originalText) {
+      if (!images[index]) return;
+
+      button.disabled = true;
+      button.textContent = "圧縮中...";
+
+      try {
+        images[index] = await compressDataUrlImage(images[index], maxSize, quality);
+        compressionLevels[index] = (compressionLevels[index] || 0) + 1;
+        renderImages();
+      } catch (error) {
+        console.error(error);
+        alert("画像の圧縮に失敗しました。");
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
+
+    async function compressMoreAndMore(index, button) {
+      if (!images[index]) return;
+
+      const currentLevel = compressionLevels[index] || 0;
+      const nextLevel = currentLevel + 1;
+
+      const settings = [
+        { maxSize: 1000, quality: 0.62 },
+        { maxSize: 850, quality: 0.55 },
+        { maxSize: 700, quality: 0.48 },
+        { maxSize: 560, quality: 0.42 },
+        { maxSize: 450, quality: 0.36 },
+        { maxSize: 360, quality: 0.30 }
+      ];
+
+      const setting = settings[Math.min(nextLevel - 1, settings.length - 1)];
+
+      button.disabled = true;
+      button.textContent = "圧縮中...";
+
+      try {
+        images[index] = await compressDataUrlImage(
+          images[index],
+          setting.maxSize,
+          setting.quality
+        );
+
+        compressionLevels[index] = nextLevel;
+        renderImages();
+      } catch (error) {
+        console.error(error);
+        alert("画像の圧縮に失敗しました。");
+        button.disabled = false;
+        button.textContent = "もっと圧縮";
+      }
     }
 
     function moveImage(from, to) {
       if (to < 0 || to >= images.length) return;
 
       const item = images.splice(from, 1)[0];
+      const level = compressionLevels.splice(from, 1)[0];
+
       images.splice(to, 0, item);
+      compressionLevels.splice(to, 0, level);
+
       renderImages();
     }
 
@@ -964,22 +1065,17 @@
       return "14.5px";
     }
 
-    function compressFileImage(file, maxSize = 1400, quality = 0.72) {
+    function fileToDataUrl(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
-        reader.onload = () => {
-          compressDataUrlImage(reader.result, maxSize, quality)
-            .then(resolve)
-            .catch(reject);
-        };
-
+        reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
 
-    function compressDataUrlImage(dataUrl, maxSize = 1200, quality = 0.68) {
+    function compressDataUrlImage(dataUrl, maxSize = 1400, quality = 0.72) {
       return new Promise((resolve, reject) => {
         const img = new Image();
 
